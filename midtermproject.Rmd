@@ -204,7 +204,7 @@ tokenizer <- function(t) {
 }
 data_tokens <- data %>% 
   unnest_tokens(word, artContent, token=tokenizer)
-data_tokens$word = clean(article_tokens$word)
+data_tokens$word = clean(data_tokens$word)
 data_tokens = data_tokens %>%
   filter(!word == "")
 ```
@@ -238,10 +238,7 @@ data_tokens_count %>%
 
 探討dcard上高大同學以及中山同學對於併校的看法
 ```{r}
-
-student_dcard =article_tokens %>%
-  smartbind(comment_tokens)
-student_dcard = student_dcard%>%
+student_dcard = data_tokens%>%
   filter(source %in% c("nsysu_dcard","nuk_dcard"))
   
 student_dcard%>%
