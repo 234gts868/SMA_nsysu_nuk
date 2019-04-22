@@ -10,11 +10,11 @@ output:
 ---
 
 ### 準備所需要的library
-```{r message=FALSE, warning=FALSE}
-packages = c("dplyr", "tidytext", "stringr", "wordcloud2","tidyverse",'knitr','kableExtra','NLP','plotly', "ggplot2",'readr','data.table','reshape2','wordcloud','tidyr','scales','jiebaR','sentimentr','htmltools',"ggraph", "igraph", "reshape2", "widyr","ggplot","gtools")
-existing = as.character(installed.packages()[,1])
-for(pkg in packages[!(packages %in% existing)]) install.packages(pkg)
-```
+# ```{r message=FALSE, warning=FALSE}
+# packages = c("dplyr", "tidytext", "stringr", "wordcloud2","tidyverse",'knitr','kableExtra','NLP','plotly', "ggplot2",'readr','data.table','reshape2','wordcloud','tidyr','scales','jiebaR','sentimentr','htmltools',"ggraph", "igraph", "reshape2", "widyr","ggplot","gtools")
+# existing = as.character(installed.packages()[,1])
+# for(pkg in packages[!(packages %in% existing)]) install.packages(pkg)
+# ```
 ### 載入 library
 ```{r message=FALSE, warning=FALSE} 
 
@@ -252,7 +252,10 @@ frequency <- student_dcard%>%
   select(-n) %>% 
   spread(source, proportion) %>% 
   gather(source, proportion, `nuk_dcard`)
-frequency
+
+kable(frequency) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
 
 ```
 ### 繪製出詞彙在中山dcard版及高大dcard版出現比率的差異
@@ -284,7 +287,11 @@ negative <- data.frame(word = negative, sentiemtns = "negative")
 colnames(negative) = c("word","sentiment")
 colnames(positive) = c("word","sentiment")
 LIWC_ch <- rbind(positive, negative)
-LIWC_ch
+
+kable(head(LIWC_ch,100)) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
+
 ```
 
 
@@ -299,6 +306,10 @@ sentiment_dcard = student_dcard %>%
   inner_join(LIWC_ch)
 student_dcard %>%
   inner_join(LIWC_ch)
+
+kable(sentiment_dcard) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
 
 
  student_dcard %>%
@@ -330,26 +341,7 @@ plot_table %>%
   geom_bar(stat="identity", width=0.5)+
   facet_grid(~source)
 ```
-
-```{r}
-
-```
-
-
-
-
-
-
-
-
-
-
-
 看不出差異，手動增加字典
-
-
-
-
 
 ```{r}
 p <- read_file("dict/nsysu_positive.txt")
@@ -425,89 +417,10 @@ plot_table %>%
   geom_bar(stat="identity", width=0.5)
 ```
 
-###計算tf-idf找出各來源討論中較獨特的詞彙
-```{r}
-#合併文章與留言的tokens
-total_tokens <- article_tokens %>% 
-  smartbind(comment_tokens)
 
-#計算各來源的總詞彙數
-total_tokens_count <- total_tokens %>% 
-  count(source, word)
-total_words_counts <- total_tokens_count %>% 
-  group_by(source) %>% 
-  summarise(total = sum(n))
+### ngram
 
-total_words <- left_join(total_tokens_count, total_words_counts)
-
-#bind tf-idf
-total_words_tf_idf <- total_words %>%
-  bind_tf_idf(word, source, n)
-
-
-kable(total_words_tf_idf ) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
-  scroll_box(height = "300px")
-```
-
-###依照各來源列出tf-idf前十高的詞彙繪製長條圖
-```{r}
-total_words_tf_idf %>% 
-  group_by(source) %>% 
-  top_n(10) %>% 
-  ungroup() %>%
-  mutate(word = reorder(word, tf_idf)) %>% 
-  ggplot(aes(word, tf_idf, fill = source)) +
-  geom_col(show.legend = FALSE) +
-  labs(x = NULL, y = "tf-idf") +
-  facet_wrap(~source, ncol = 2, scales = "free") +
-  coord_flip()
-```
-
-#各來源詞彙比例與詞頻長條圖
-```{r}
-ggplot(total_words, aes(n/total, fill = source)) +
-  geom_histogram(show.legend = FALSE) +
-  xlim(NA, 0.01) +
-  facet_wrap(~source, ncol = 2, scales = "free_y")
-```
-
-###討論併校的文章是否符合zip'f law
-```{r}
-freq_by_rank <- total_words %>% 
-  group_by(source) %>% 
-  arrange(desc(n)) %>% 
-  mutate(rank = row_number(), 
-         `term frequency` = n/total)
-
-freq_by_rank
-
-freq_by_rank %>% 
-  ggplot(aes(rank, `term frequency`, color = source)) + 
-  geom_line(size = 1.1, alpha = 0.8, show.legend = FALSE) + 
-  scale_x_log10() +
-  scale_y_log10()
-```
-
-```{r}
-rank_subset <- freq_by_rank %>% 
-  filter(rank < 500,
-         rank > 10)
-
-lm(log10(`term frequency`) ~ log10(rank), data = rank_subset)
-```
-```{r}
-freq_by_rank %>% 
-  ggplot(aes(rank, `term frequency`, color = source)) + 
-  geom_abline(intercept = -1.417  , slope = -0.730, color = "gray50", linetype = 2) +
-  geom_line(size = 1.1, alpha = 0.8, show.legend = FALSE) + 
-  scale_x_log10() +
-  scale_y_log10()
-```
-
-###ngram
-
-###bigram function
+### bigram function
 ```{r}
 # remove stopwords
 
@@ -526,17 +439,19 @@ jieba_bigram <- function(t) {
 }
 ```
 
-###執行bigram斷詞
+### 執行bigram斷詞
 ```{r}
 article_comment <- article %>% 
   smartbind(comment)
 article_comment_bigram <- article_comment %>%
   unnest_tokens(bigram, artContent, token = jieba_bigram)
 
-head(article_comment_bigram, 100) 
+kable(head(article_comment_bigram, 100)) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
 ```
 
-###載入各種字典
+### 載入各種字典
 ```{r}
 # load devotion_lexicon
 user_dict <- scan(file = "./dict/user_dict.txt", what=character(),sep='\n', 
@@ -551,7 +466,7 @@ negation_words <- scan(file = "./dict/negation_words.txt", what=character(),sep=
 
 ```
 
-###ngram 結合 情緒分析
+### ngram 結合 情緒分析
 ```{r}
 # 將bigram拆成word1和word2
 # 將包含英文字母或和數字的詞彙清除
@@ -578,10 +493,13 @@ article_comment_sentiment_bigrams <- rbind(
     merge(LIWC_ch , by.x='word2', by.y='word')
 )    
 
-article_comment_sentiment_bigrams 
+kable(article_comment_sentiment_bigrams) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
+
 ```
 
-###將positive與negative給予情緒值
+### 將positive與negative給予情緒值
 ```{r}
 # 選出word2中，有出現在情緒詞典中的詞彙
 # 如果是正面詞彙則賦予： 情緒標籤爲"positive"、情緒值爲  1
@@ -595,11 +513,12 @@ article_comment_sentiment_bigrams <- article_comment_sentiment_bigrams %>%
   mutate(sentiment = ifelse(sentiment_tag == "positive",1,-1)) %>%
   select(source, artDate, word1, word2, sentiment_tag, sentiment)
   
-
-article_comment_sentiment_bigrams
+kable(article_comment_sentiment_bigrams) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
 ```
 
-###繪製情緒走勢圖
+### 繪製情緒走勢圖
 ```{r}
 # 生成一個時間段中的 日期和情緒標籤的所有可能組合
 all_dates <- 
@@ -628,39 +547,39 @@ sentiment_plot_data %>%
   scale_x_date(labels = date_format("%m/%d")) 
 ```
 
-###各來源的情緒走勢圖
+### 各來源的情緒走勢圖
 
 ```{r}
 
 # 計算我們資料集中 每日的情緒值
-sentiment_plot_data <- article_comment_sentiment_bigrams %>%
+source_sentiment_plot_data <- article_comment_sentiment_bigrams %>%
   group_by(source, artDate,sentiment_tag) %>%
   summarise(count=n())  
 
 # 將所有 "日期與情緒值的所有可能組合" 與 "每日的情緒值" join起來
 # 如果資料集中某些日期沒有文章或情緒值，會出現NA
 # 我們用0取代NA
-sentiment_plot_data <- rbind(
+source_sentiment_plot_data <- rbind(
   all_dates %>% 
-  merge(sentiment_plot_data %>% 
+  merge(source_sentiment_plot_data %>% 
           filter(source == "nsysu_dcard")
         ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
         all.x=T,all.y=T) %>% 
   mutate(source = "nsysu_dcard"), 
   all_dates %>% 
-  merge(sentiment_plot_data %>% 
+  merge(source_sentiment_plot_data %>% 
           filter(source == "nuk_dcard")
         ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
         all.x=T,all.y=T) %>% 
   mutate(source = "nuk_dcard"), 
   all_dates %>% 
-  merge(sentiment_plot_data %>% 
+  merge(source_sentiment_plot_data %>% 
           filter(source == "exam_dcard")
         ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
         all.x=T,all.y=T) %>% 
   mutate(source = "exam_dcard"), 
   all_dates %>% 
-  merge(sentiment_plot_data %>% 
+  merge(source_sentiment_plot_data %>% 
           filter(source == "ptt")
         ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
         all.x=T,all.y=T) %>% 
@@ -671,7 +590,7 @@ sentiment_plot_data <- rbind(
 sentiment_plot_data
 
 # 畫圖
-sentiment_plot_data %>%
+source_sentiment_plot_data %>%
   ggplot()+
   geom_line(aes(x=artDate,y=count,colour=sentiment))+
   scale_x_date(labels = date_format("%m/%d")) + 
@@ -679,7 +598,7 @@ sentiment_plot_data %>%
 ```
 
 
-##使用否定詞改變詞彙情緒值
+### 使用否定詞改變詞彙情緒值
 ```{r}
 # 查看 前面出現否定詞 且 後面爲情緒詞彙 的組合
 article_comment_sentiment_bigrams %>%
@@ -692,10 +611,13 @@ article_comment_sentiment_bigrams %>%
 article_comment_sentiment_bigrams_negated <- article_comment_sentiment_bigrams %>%
   mutate(sentiment=ifelse(word1 %in% negation_words, -1*sentiment, sentiment)) %>%
   mutate(sentiment_tag=ifelse(sentiment>0, "positive", "negative"))
-article_comment_sentiment_bigrams_negated
+
+kable(article_comment_sentiment_bigrams_negated) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
 ```
 
-###繪製否定詞改變後的情緒走勢圖
+### 繪製否定詞改變後的情緒走勢圖
 ```{r}
 # 計算我們資料集中 每日的情緒值
 negated_sentiment_plot_data <- article_comment_sentiment_bigrams_negated %>%
@@ -715,56 +637,120 @@ negated_sentiment_plot_data %>%
   scale_x_date(labels = date_format("%m/%d")) 
 ```
 
-###各來源否定詞改變後的情緒走勢圖
+### 各來源否定詞改變後的情緒走勢圖
 ```{r}
 
 # 計算我們資料集中 每日的情緒值
-negated_sentiment_plot_data <- article_comment_sentiment_bigrams_negated %>%
+source_negated_sentiment_plot_data <- article_comment_sentiment_bigrams_negated %>%
   group_by(source, artDate,sentiment_tag) %>%
   summarise(count=n())  
 
 # 將所有 "日期與情緒值的所有可能組合" 與 "每日的情緒值" join起來
 # 如果資料集中某些日期沒有文章或情緒值，會出現NA
 # 我們用0取代NA
-negated_sentiment_plot_data <- rbind(
+source_negated_sentiment_plot_data <- rbind(
   all_dates %>% 
-  merge(negated_sentiment_plot_data %>% 
+  merge(source_negated_sentiment_plot_data %>% 
           filter(source == "nsysu_dcard")
         ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
         all.x=T,all.y=T) %>% 
   mutate(source = "nsysu_dcard"), 
   all_dates %>% 
-  merge(negated_sentiment_plot_data %>% 
+  merge(source_negated_sentiment_plot_data %>% 
           filter(source == "nuk_dcard")
         ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
         all.x=T,all.y=T) %>% 
   mutate(source = "nuk_dcard"), 
   all_dates %>% 
-  merge(negated_sentiment_plot_data %>% 
+  merge(source_negated_sentiment_plot_data %>% 
           filter(source == "exam_dcard")
         ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
         all.x=T,all.y=T) %>% 
   mutate(source = "exam_dcard"), 
   all_dates %>% 
-  merge(negated_sentiment_plot_data %>% 
+  merge(source_negated_sentiment_plot_data %>% 
           filter(source == "ptt")
         ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
         all.x=T,all.y=T) %>% 
   mutate(source = "ptt") 
   ) %>% 
   mutate(count = replace_na(count, 0))
-# 時間區段中，每日的情緒值
-sentiment_plot_data
 
 # 畫圖
-sentiment_plot_data %>%
+source_negated_sentiment_plot_data %>%
+  ggplot()+
+  geom_line(aes(x=artDate,y=count,colour=sentiment))+
+  scale_x_date(labels = date_format("%m/%d")) + 
+  facet_wrap(~source)
+```
+### 比較否定詞相反情緒值後的情緒走勢
+```{r}
+# 合併兩種情緒值的資料
+all_sentiments <- bind_rows(
+  sentiment_plot_data %>% mutate(sentiment=paste(sentiment, "_original", sep = "")),
+  negated_sentiment_plot_data %>% mutate(sentiment=paste(sentiment, "_negated", sep = ""))) 
+
+kable(all_sentiments) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
+
+```
+
+```{r}
+# 先比較正面情緒
+a = all_sentiments %>% 
+  filter(sentiment %in% c("positive_negated", "positive_original")) 
+ b  = a %>% ggplot()+
+  geom_line(aes(x=artDate,y=count,colour=sentiment))+
+  scale_x_date(labels = date_format("%m/%d")) 
+
+s = ggplotly(b)
+s
+```
+
+```{r}
+# 再比較負面情緒
+all_sentiments %>% 
+  filter(sentiment %in% c("negative_original", "negative_negated")) %>%
+  ggplot()+
+  geom_line(aes(x=artDate,y=count,colour=sentiment))+
+  scale_x_date(labels = date_format("%m/%d")) 
+```
+### 比較各來源否定詞相反情緒值後的情緒走勢
+```{r}
+# 合併兩種情緒值的資料
+all_sentiments <- bind_rows(
+  source_sentiment_plot_data %>% mutate(sentiment=paste(sentiment, "_original", sep = "")),
+  source_negated_sentiment_plot_data %>% mutate(sentiment=paste(sentiment, "_negated", sep = ""))) 
+
+kable(all_sentiments) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
+
+```
+
+```{r}
+# 先比較正面情緒
+all_sentiments %>% 
+  filter(sentiment %in% c("positive_original", "positive_negated")) %>%
+  ggplot()+
+  geom_line(aes(x=artDate,y=count,colour=sentiment))+
+  scale_x_date(labels = date_format("%m/%d")) +
+  facet_wrap(~source)
+```
+
+```{r}
+# 再比較負面情緒
+all_sentiments %>% 
+  filter(sentiment %in% c("negative_original", "negative_negated")) %>%
   ggplot()+
   geom_line(aes(x=artDate,y=count,colour=sentiment))+
   scale_x_date(labels = date_format("%m/%d")) + 
   facet_wrap(~source)
 ```
 
-###11gram - 尋找特定詞彙的前後5個詞彙
+
+### 11gram - 尋找特定詞彙的前後5個詞彙
 ```{r}
 # ngram function, where n=11
 ngram_11 <- function(t) {
@@ -785,20 +771,28 @@ article_comment_ngram_11 <- article_comment %>%
   select(id, artContent) %>%
   unnest_tokens(ngram, artContent, token = ngram_11) %>%
   filter(!str_detect(ngram, regex("[0-9a-zA-Z]")))
-article_comment_ngram_11
 ```
 ```{r}
 # 將ngram拆成word1 ~ word11
 ngrams_11_separated <- article_comment_ngram_11 %>%
   separate(ngram, paste0("word", c(1:11),sep=""), sep = " ")
-ngrams_11_separated
+  
+kable(ngrams_11_separated) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
+
 ```
 
+### 尋找 "中山" 出現的前後五個詞彙
 ```{r}
 # 尋找 "中山" 出現的前後五個詞彙
 tu_five_words <- ngrams_11_separated %>%
   filter((word6=="中山"))
-tu_five_words
+
+kable(tu_five_words) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
+
 ```
 
 
@@ -810,7 +804,10 @@ tu_five_words_count <- tu_five_words %>%
   filter(variable!="word6") %>%
   filter(!(word %in% stop_words), nchar(word)>1) %>%
   count(word, sort = TRUE)
-tu_five_words_count
+
+kable(tu_five_words_count) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
 ```
 
 ```{r}
@@ -827,32 +824,39 @@ tu_five_words_count %>%
   theme(text = element_text(family = "Heiti TC Light")) #加入中文字型設定，避免中文字顯示錯誤。
 ```
 
-###Word Correlation
+### Word Correlation
 ```{r}
 # 計算兩個詞彙同時出現的總次數
-id_total_tokens <- total_tokens %>%
+id_data_tokens <- data_tokens %>%
   count(id, word, sort = TRUE) 
 
-word_pairs <- id_total_tokens %>%
+word_pairs <- id_data_tokens %>%
   pairwise_count(word, id, sort = TRUE)
 
-head(word_pairs, 100) 
+kable(head(word_pairs, 100)) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
+
 ```
 
 ```{r}
 # 計算兩個詞彙間的相關性
-word_cors <- id_total_tokens %>%
+word_cors <- id_data_tokens %>%
   group_by(word) %>%
   filter(n() >= 20) %>%
   pairwise_cor(word, id, sort = TRUE)
-head(word_cors,20)
+
+kable(head(word_cors,20)) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
+
 ```
 
 ```{r}
-# 顯示相關性大於0.4的組合
+# 顯示相關性大於0.398的組合
 set.seed(2019)
 word_cors %>%
-  filter(correlation > .4) %>%
+  filter(correlation > .398) %>%
   graph_from_data_frame() %>%
   ggraph(layout = "fr") +
   geom_edge_link(aes(edge_alpha = correlation), show.legend = FALSE) +
@@ -860,4 +864,82 @@ word_cors %>%
   geom_node_text(aes(label = name), repel = TRUE, family = "Heiti TC Light") + #加入中文字型設定，避免中文字顯示錯誤。
   theme_void()
 ```
+
+### 計算tf-idf找出各來源討論中較獨特的詞彙
+```{r}
+
+
+#計算各來源的總詞彙數
+data_tokens_count <- data_tokens %>% 
+  count(source, word)
+total_words_counts <- data_tokens_count %>% 
+  group_by(source) %>% 
+  summarise(total = sum(n))
+
+total_words <- left_join(data_tokens_count, total_words_counts)
+
+#bind tf-idf
+total_words_tf_idf <- total_words %>%
+  bind_tf_idf(word, source, n)
+
+
+kable(total_words_tf_idf ) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
+```
+
+### 依照各來源列出tf-idf前十高的詞彙繪製長條圖
+```{r}
+total_words_tf_idf %>% 
+  group_by(source) %>% 
+  top_n(10) %>% 
+  ungroup() %>%
+  mutate(word = reorder(word, tf_idf)) %>% 
+  ggplot(aes(word, tf_idf, fill = source)) +
+  geom_col(show.legend = FALSE) +
+  labs(x = NULL, y = "tf-idf") +
+  facet_wrap(~source, ncol = 2, scales = "free") +
+  coord_flip()
+```
+
+### 各來源詞彙比例與詞頻長條圖
+```{r}
+ggplot(total_words, aes(n/total, fill = source)) +
+  geom_histogram(show.legend = FALSE) +
+  xlim(NA, 0.01) +
+  facet_wrap(~source, ncol = 2, scales = "free_y")
+```
+
+### 討論併校的文章是否符合zip'f law
+```{r}
+freq_by_rank <- total_words %>% 
+  group_by(source) %>% 
+  arrange(desc(n)) %>% 
+  mutate(rank = row_number(), 
+         `term frequency` = n/total)
+
+freq_by_rank
+
+freq_by_rank %>% 
+  ggplot(aes(rank, `term frequency`, color = source)) + 
+  geom_line(size = 1.1, alpha = 0.8, show.legend = FALSE) + 
+  scale_x_log10() +
+  scale_y_log10()
+```
+### 依照lm模型結果繪製虛線
+```{r}
+rank_subset <- freq_by_rank %>% 
+  filter(rank < 500,
+         rank > 10)
+
+lm(log10(`term frequency`) ~ log10(rank), data = rank_subset)
+
+freq_by_rank %>% 
+  ggplot(aes(rank, `term frequency`, color = source)) + 
+  geom_abline(intercept = -1.417  , slope = -0.730, color = "gray50", linetype = 2) +
+  geom_line(size = 1.1, alpha = 0.8, show.legend = FALSE) + 
+  scale_x_log10() +
+  scale_y_log10()
+```
+
 
