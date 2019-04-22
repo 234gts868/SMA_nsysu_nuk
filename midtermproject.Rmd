@@ -2,7 +2,11 @@
 title: "SMA"
 author: "Bolun Lin"
 date: "2019年4月19日"
-output: html_document
+output: 
+  html_document:
+    highlight: pygments
+    theme: flatly
+    css: style.css
 ---
 
 ### 準備所需要的library
@@ -406,8 +410,10 @@ sentiment_dcard = student_dcard %>%
   summarise(sum = n()) %>% 
   filter(sum>1) %>%
   arrange(desc(sum))%>%
+  filter(source =="nsysu_dcard")%>%
   inner_join(nsysu_ch)
 student_dcard %>%
+  filter(source =="nsysu_dcard")%>%
   inner_join(nsysu_ch)
 ```
 
@@ -441,8 +447,10 @@ sentiment_dcard = student_dcard %>%
   summarise(sum = n()) %>% 
   filter(sum>1) %>%
   arrange(desc(sum))%>%
+  filter(source=="nuk_dcard")%>%
   inner_join(nuk_ch)
 student_dcard %>%
+  filter(source=="nuk_dcard")%>%
   inner_join(nuk_ch)
 ```
 
