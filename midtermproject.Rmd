@@ -99,7 +99,7 @@ kable(head(ptt_data,100)) %>%
   kable_styling(bootstrap_options = c("striped", "hover")) %>% 
   scroll_box(height = "300px")
 ```
- 總共有 30篇dcard中山板的文、30篇高大板的文章、29篇ptt板的文章
+- 總共有 30篇dcard中山板的文、30篇高大板的文章、29篇ptt板的文章
 ### 將文章資料合在一起
 ```{r}
 #透過rbind將文章資料合起來
@@ -167,7 +167,7 @@ data_count_by_date <- data %>%
 head(data_count_by_date, 20)
 
 ```
-
+### 利用ggplotly畫出日期以及文章分布折線圖 
 ```{r message=FALSE, warning=FALSE}
 plot_date <- 
   data_count_by_date %>% 
@@ -182,7 +182,7 @@ plot_date <-
 
 ggplotly(plot_date)
 ```
-
+### 增加結巴字典以及正規化function已得到tokens
 ```{r}
 jieba_tokenizer <- worker(user="dict/user_dict.txt", stop_word = "dict/stop_words.txt")
 clean = function(txt) {
@@ -211,30 +211,21 @@ data_tokens = data_tokens %>%
 # 文字雲
 ```{r}
 # 計算詞彙的出現次數，如果詞彙只有一個字則不列入計算
-article_tokens_count <- article_tokens %>% 
+data_tokens_count <- data_tokens %>% 
   filter(nchar(.$word)>1) %>%
   group_by(word) %>% 
   summarise(sum = n()) %>% 
   filter(sum>1) %>%
   arrange(desc(sum))
-comment_tokens_count <- comment_tokens %>% 
-  filter(nchar(.$word)>1) %>%
-  group_by(word) %>% 
-  summarise(sum = n()) %>% 
-  filter(sum>1) %>%
-  arrange(desc(sum))
+
 # 印出最常見的20個詞彙
-head(article_tokens_count, 20)
-head(comment_tokens_count, 20)
+data_tokens_count %>% wordcloud2()
+
 
 ```
+
 ```{r}
-
-article_tokens_count %>% wordcloud2()
-
-comment_tokens_count %>% wordcloud2()
-
-article_tokens_count %>%
+data_tokens_count %>%
   filter(!word %in% c("中山","大學","中山大學","高大","學校","高雄大學","國立","合校"))%>%
   mutate(word = reorder(word, sum)) %>%
   top_n(25,sum) %>%
@@ -242,15 +233,6 @@ article_tokens_count %>%
   geom_col() +
   xlab(NULL) +
   coord_flip()
-comment_tokens_count %>%
-  filter(!word %in% c("中山","大學","中山大學","高大","學校","高雄大學","國立","合校"))%>%
-  mutate(word = reorder(word, sum)) %>%
-  top_n(25,sum) %>%
-  ggplot(aes(word, sum)) +
-  geom_col() +
-  xlab(NULL) +
-  coord_flip()
-
 
 ```
 
