@@ -11,7 +11,7 @@ output:
 
 ### 準備所需要的library
 ```{r message=FALSE, warning=FALSE}
-packages = c("dplyr", "tidytext", "stringr", "wordcloud2","tidyverse",'knitr','kableExtra','NLP', "ggplot2",'readr','data.table','reshape2','wordcloud','tidyr','scales','jiebaR','sentimentr','htmltools',"ggraph", "igraph", "reshape2", "widyr","ggplot")
+packages = c("dplyr", "tidytext", "stringr", "wordcloud2","tidyverse",'knitr','kableExtra','NLP', "ggplot2",'readr','data.table','reshape2','wordcloud','tidyr','scales','jiebaR','sentimentr','htmltools',"ggraph", "igraph", "reshape2", "widyr","ggplot","gtools")
 existing = as.character(installed.packages()[,1])
 for(pkg in packages[!(packages %in% existing)]) install.packages(pkg)
 ```
@@ -40,6 +40,7 @@ library(plotly)
 library(igraph)
 library(reshape2)
 library(widyr)
+library(gtools)
 ```
 
 ### 載入文章及留言
@@ -137,10 +138,11 @@ kable(head(comment,100)) %>%
   scroll_box(height = "300px")
 
 ```
-### 再將留言資料和文章資料合起來，再一日期計算文章數
+### 再將留言資料和文章資料合起來，再以日期計算文章數
 ```{r}
 data = article%>%
-  smartbind(comment) %>% 
+  smartbind(comment)
+data%>% 
   select(artDate, id,source) %>% 
   distinct()
 
@@ -168,8 +170,6 @@ plot_date <-
 ggplotly(plot_date)
 ```
 
-
-
 ```{r}
 jieba_tokenizer <- worker(user="dict/user_dict.txt", stop_word = "dict/stop_words.txt")
 clean = function(txt) {
@@ -189,16 +189,10 @@ tokenizer <- function(t) {
     return(tokens)
   })
 }
-article_tokens <- article %>% 
+data_tokens <- data %>% 
   unnest_tokens(word, artContent, token=tokenizer)
-article_tokens$word = clean(article_tokens$word)
-article_tokens = article_tokens %>%
-  filter(!word == "")
-
-comment_tokens <- comment %>% 
-  unnest_tokens(word, artContent, token=tokenizer)
-comment_tokens$word = clean(comment_tokens$word)
-comment_tokens = comment_tokens %>%
+data_tokens$word = clean(article_tokens$word)
+data_tokens = data_tokens %>%
   filter(!word == "")
 ```
 # 文字雲
@@ -249,7 +243,7 @@ comment_tokens_count %>%
 
 探討dcard上高大同學以及中山同學對於併校的看法
 ```{r}
-library(gtools)
+
 student_dcard =article_tokens %>%
   smartbind(comment_tokens)
 student_dcard = student_dcard%>%
@@ -263,6 +257,7 @@ student_dcard%>%
   geom_bar(stat="identity", width=0.5,fill="steelblue")+
   geom_text(aes(label=sum), vjust=-0.3, size=3.5)
 ```
+
 ```{r}
 frequency <- student_dcard%>%
   dplyr::count(source, word)%>%
