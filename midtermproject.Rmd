@@ -159,10 +159,7 @@ kable(head(data_count_by_date, 20)) %>%
   scroll_box(height = "300px")
 
 ```
-<<<<<<< HEAD
-=======
 
->>>>>>> 7c698d1136f4967186dcb9afc04a08f5c87c2555
 ### 畫出日期以及文章分布折線圖 
 ```{r message=FALSE, warning=FALSE}
 plot_date <- 
