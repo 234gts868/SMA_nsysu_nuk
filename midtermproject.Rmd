@@ -11,7 +11,7 @@ output:
 
 ### 準備所需要的library
 ```{r message=FALSE, warning=FALSE}
-packages = c("dplyr", "tidytext", "stringr", "wordcloud2","tidyverse",'knitr','kableExtra','NLP', "ggplot2",'readr','data.table','reshape2','wordcloud','tidyr','scales','jiebaR','sentimentr','htmltools',"ggraph", "igraph", "reshape2", "widyr","ggplot","gtools")
+packages = c("dplyr", "tidytext", "stringr", "wordcloud2","tidyverse",'knitr','kableExtra','NLP','plotly', "ggplot2",'readr','data.table','reshape2','wordcloud','tidyr','scales','jiebaR','sentimentr','htmltools',"ggraph", "igraph", "reshape2", "widyr","ggplot","gtools")
 existing = as.character(installed.packages()[,1])
 for(pkg in packages[!(packages %in% existing)]) install.packages(pkg)
 ```
@@ -81,25 +81,8 @@ ptt_data = ptt_data %>%
 #將ptt的資料_id 改成統一的id
 colnames(ptt_data)[which(names(ptt_data) == "_id")] <- "id"
 
-
-
-kable(head(nuk_data,100)) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
-  scroll_box(height = "300px")
-
-kable(head(nuk_data,100)) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
-  scroll_box(height = "300px")
-  
-kable(head(exam_data,100)) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
-  scroll_box(height = "300px")
-
-kable(head(ptt_data,100)) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
-  scroll_box(height = "300px")
 ```
-- 總共有 30篇dcard中山板的文、30篇高大板的文章、29篇ptt板的文章
+- 總共有 30篇dcard中山板的文、34篇高大板的文章、13篇考試板的文章、20篇ptt板的文章
 ### 將文章資料合在一起
 ```{r}
 #透過rbind將文章資料合起來
@@ -113,7 +96,10 @@ article = article %>%
   rbind(ptt_data %>% select(id,artDate ,source ,artTitle,artContent))
 
 article$artDate = as.Date(article$artDate)
-article
+
+kable(article) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
 ```
 ### 整理留言資料
 ```{r}
@@ -129,10 +115,7 @@ nsysu_comment = nsysu_comment %>%
 ptt_comment = ptt_comment %>%
   filter(nchar(ptt_comment$content)>5)%>% #386
   mutate(source="ptt")
-head(nsysu_comment,10)
-head(nuk_comment,10)
-head(exam_comment,10)
-head(ptt_comment,10)
+
 ```
 ### 將留言資料合在一起
 ```{r}
@@ -149,12 +132,22 @@ comment$artDate = as.Date(comment$artDate)
 comment <- comment %>% 
   filter(id %in% article$id)
 
-comment
+kable(comment) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
 ```
-### 再將留言資料和文章資料合起來，再以日期計算文章數
+### 將留言資料和文章資料合起來
 ```{r}
 data = article%>%
   smartbind(comment)
+
+kable(data) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
+```
+
+###以日期計算文章數
+```{r}
 data%>% 
   select(artDate, id,source) %>% 
   distinct()
@@ -431,13 +424,13 @@ plot_table %>%
   geom_bar(stat="identity", width=0.5)
 ```
 
-#計算tf-idf找出各種板討論中較獨特的詞彙
+###計算tf-idf找出各來源討論中較獨特的詞彙
 ```{r}
 #合併文章與留言的tokens
 total_tokens <- article_tokens %>% 
   smartbind(comment_tokens)
 
-#計算各板的總詞彙數
+#計算各來源的總詞彙數
 total_tokens_count <- total_tokens %>% 
   count(source, word)
 total_words_counts <- total_tokens_count %>% 
@@ -449,9 +442,14 @@ total_words <- left_join(total_tokens_count, total_words_counts)
 #bind tf-idf
 total_words_tf_idf <- total_words %>%
   bind_tf_idf(word, source, n)
-total_words_tf_idf 
+
+
+kable(total_words_tf_idf ) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
 ```
 
+###依照各來源列出tf-idf前十高的詞彙繪製長條圖
 ```{r}
 total_words_tf_idf %>% 
   group_by(source) %>% 
@@ -465,7 +463,7 @@ total_words_tf_idf %>%
   coord_flip()
 ```
 
-#各板詞彙比例與詞頻長條圖
+#各來源詞彙比例與詞頻長條圖
 ```{r}
 ggplot(total_words, aes(n/total, fill = source)) +
   geom_histogram(show.legend = FALSE) +
@@ -473,7 +471,7 @@ ggplot(total_words, aes(n/total, fill = source)) +
   facet_wrap(~source, ncol = 2, scales = "free_y")
 ```
 
-#討論併校的文章是否符合zip'f law
+###討論併校的文章是否符合zip'f law
 ```{r}
 freq_by_rank <- total_words %>% 
   group_by(source) %>% 
@@ -506,7 +504,7 @@ freq_by_rank %>%
   scale_y_log10()
 ```
 
-#ngram
+###ngram
 
 ###bigram function
 ```{r}
@@ -527,7 +525,7 @@ jieba_bigram <- function(t) {
 }
 ```
 
-##執行bigram斷詞
+###執行bigram斷詞
 ```{r}
 article_comment <- article %>% 
   smartbind(comment)
@@ -537,7 +535,7 @@ article_comment_bigram <- article_comment %>%
 head(article_comment_bigram, 100) 
 ```
 
-##載入各種字典
+###載入各種字典
 ```{r}
 # load devotion_lexicon
 user_dict <- scan(file = "./dict/user_dict.txt", what=character(),sep='\n', 
@@ -552,7 +550,7 @@ negation_words <- scan(file = "./dict/negation_words.txt", what=character(),sep=
 
 ```
 
-##ngram 結合 情緒分析
+###ngram 結合 情緒分析
 ```{r}
 # 將bigram拆成word1和word2
 # 將包含英文字母或和數字的詞彙清除
@@ -582,10 +580,7 @@ article_comment_sentiment_bigrams <- rbind(
 article_comment_sentiment_bigrams 
 ```
 
-
-
-
-
+###將positive與negative給予情緒值
 ```{r}
 # 選出word2中，有出現在情緒詞典中的詞彙
 # 如果是正面詞彙則賦予： 情緒標籤爲"positive"、情緒值爲  1
@@ -603,7 +598,7 @@ article_comment_sentiment_bigrams <- article_comment_sentiment_bigrams %>%
 article_comment_sentiment_bigrams
 ```
 
-
+###繪製情緒走勢圖
 ```{r}
 # 生成一個時間段中的 日期和情緒標籤的所有可能組合
 all_dates <- 
@@ -632,7 +627,7 @@ sentiment_plot_data %>%
   scale_x_date(labels = date_format("%m/%d")) 
 ```
 
-##各板的情緒走勢圖
+###各來源的情緒走勢圖
 
 ```{r}
 
@@ -699,7 +694,7 @@ article_comment_sentiment_bigrams_negated <- article_comment_sentiment_bigrams %
 article_comment_sentiment_bigrams_negated
 ```
 
-#畫情緒走勢圖
+###繪製否定詞改變後的情緒走勢圖
 ```{r}
 # 計算我們資料集中 每日的情緒值
 negated_sentiment_plot_data <- article_comment_sentiment_bigrams_negated %>%
@@ -719,8 +714,7 @@ negated_sentiment_plot_data %>%
   scale_x_date(labels = date_format("%m/%d")) 
 ```
 
-##各板的情緒走勢圖
-
+###各來源否定詞改變後的情緒走勢圖
 ```{r}
 
 # 計算我們資料集中 每日的情緒值
@@ -769,7 +763,7 @@ sentiment_plot_data %>%
   facet_wrap(~source)
 ```
 
-#11gram - 尋找特定詞彙的前後5個詞彙
+###11gram - 尋找特定詞彙的前後5個詞彙
 ```{r}
 # ngram function, where n=11
 ngram_11 <- function(t) {
@@ -832,7 +826,7 @@ tu_five_words_count %>%
   theme(text = element_text(family = "Heiti TC Light")) #加入中文字型設定，避免中文字顯示錯誤。
 ```
 
-##Word Correlation
+###Word Correlation
 ```{r}
 # 計算兩個詞彙同時出現的總次數
 id_total_tokens <- total_tokens %>%
