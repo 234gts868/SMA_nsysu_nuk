@@ -525,7 +525,7 @@ freq_by_rank %>%
 ###bigram function
 ```{r}
 # remove stopwords
-jieba_tokenizer = worker()
+
 # unnest_tokens 使用的bigram分詞函數
 # Input: a character vector
 # Output: a list of character vectors of the same length
@@ -576,12 +576,29 @@ bigrams_separated <- article_comment_bigram %>%
 
 # 並選出word2爲情緒詞的bigram
 #去除wrod1與word2都是stop word
-article_comment_sentiment_bigrams <- bigrams_separated %>%
-  filter(!(word1 %in% stop_words & word2 %in% stop_words)) %>%
-  filter(word2 %in% LIWC_ch$word) 
+bigrams_separated  <- bigrams_separated %>%
+  filter(!(word1 %in% stop_words & word2 %in% stop_words)) 
 
-article_comment_sentiment_bigrams
+article_comment_sentiment_bigrams <- rbind(
+  bigrams_separated %>% 
+    filter(source == "nsysu_dcard") %>% 
+    merge(nsysu_ch , by.x='word2', by.y='word')
+  ,
+  bigrams_separated %>% 
+    filter(source == "nuk_dcard") %>% 
+    merge(nuk_ch , by.x='word2', by.y='word')
+  ,
+  bigrams_separated %>% 
+    filter(source == "ptt" | source == "exam_dcard") %>% 
+    merge(LIWC_ch , by.x='word2', by.y='word')
+)    
+
+article_comment_sentiment_bigrams 
 ```
+
+
+
+
 
 ```{r}
 # 選出word2中，有出現在情緒詞典中的詞彙
@@ -589,13 +606,20 @@ article_comment_sentiment_bigrams
 # 如果是負面詞彙則賦予： 情緒標籤爲"negative"、情緒值爲 -1
 
 #將正負面詞分開
-LIWC_ch_pos <- LIWC_ch %>% filter(sentiment == "positive")
-LIWC_ch_neg <- LIWC_ch %>% filter(sentiment == "negative")
+
+article_comment_sentiment_bigrams <- article_comment_sentiment_bigrams %>% rename(sentiment_tag = sentiment)
 
 article_comment_sentiment_bigrams <- article_comment_sentiment_bigrams %>% 
-  select(source, artDate, word1, word2) %>%
-  mutate(sentiment = ifelse(word2 %in% LIWC_ch_pos$word,1,-1), sentiment_tag = ifelse(word2 %in% LIWC_ch_pos$word, "positive", "negative"))
+  mutate(sentiment = ifelse(sentiment_tag == "positive",1,-1)) %>%
+  select(source, artDate, word1, word2, sentiment_tag, sentiment)
+  
+
 article_comment_sentiment_bigrams
+```
+```{r}
+article_comment_sentiment_bigrams %>%
+  filter(source =='nuk_dcard') %>%
+  count(sentiment_tag) %>% View()
 ```
 
 ```{r}
