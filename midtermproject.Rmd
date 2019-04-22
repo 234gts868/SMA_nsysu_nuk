@@ -208,7 +208,7 @@ data_tokens$word = clean(data_tokens$word)
 data_tokens = data_tokens %>%
   filter(!word == "")
 ```
-# 文字雲
+### 文字雲
 ```{r}
 # 計算詞彙的出現次數，如果詞彙只有一個字則不列入計算
 data_tokens_count <- data_tokens %>% 
@@ -219,11 +219,12 @@ data_tokens_count <- data_tokens %>%
   arrange(desc(sum))
 
 # 印出最常見的20個詞彙
+head(data_tokens_count,20)
 data_tokens_count %>% wordcloud2()
 
 
 ```
-
+### 過濾主題字查看常出現的詞彙
 ```{r}
 data_tokens_count %>%
   filter(!word %in% c("中山","大學","中山大學","高大","學校","高雄大學","國立","合校"))%>%
@@ -236,7 +237,7 @@ data_tokens_count %>%
 
 ```
 
-探討dcard上高大同學以及中山同學對於併校的看法
+### 探討dcard上高大同學以及中山同學對於併校的看法
 ```{r}
 student_dcard = data_tokens%>%
   filter(source %in% c("nsysu_dcard","nuk_dcard"))
@@ -249,7 +250,7 @@ student_dcard%>%
   geom_bar(stat="identity", width=0.5,fill="steelblue")+
   geom_text(aes(label=sum), vjust=-0.3, size=3.5)
 ```
-
+### 計算詞彙在中山dcard版及高大dcard版出現比率的差異
 ```{r}
 frequency <- student_dcard%>%
   dplyr::count(source, word)%>%
@@ -261,7 +262,7 @@ frequency <- student_dcard%>%
 frequency
 
 ```
-
+### 繪製出詞彙在中山dcard版及高大dcard版出現比率的差異
 ```{r}
 ggplot(frequency, aes(x = proportion, y = `nsysu_dcard`, color = abs(`nsysu_dcard` - proportion))) +
   geom_abline(color = "gray40", lty = 2) +
@@ -273,12 +274,12 @@ ggplot(frequency, aes(x = proportion, y = `nsysu_dcard`, color = abs(`nsysu_dcar
   theme(legend.position="none") +
   labs(y = "nsysu_dcard", x = "nuk_dcard")
 ```
-
+### 計算中山dcard以及高大dcard詞彙相關係數
 ```{r}
 cor.test(data = frequency[frequency$source == "nuk_dcard",],
          ~ proportion + `nsysu_dcard`)
 ```
-#準備LIWC字典 
+### 準備LIWC中文情緒字典 
 ```{r}
 p <- read_file("dict/positive.txt")
 n <- read_file("dict/negative.txt")
@@ -294,7 +295,7 @@ LIWC_ch
 ```
 
 
-## 情緒字典
+### 使用LIWC中文情緒字典應用於中山及高大dcard版詞彙
 ```{r}
 sentiment_dcard = student_dcard %>%
    filter(nchar(.$word)>1) %>%
