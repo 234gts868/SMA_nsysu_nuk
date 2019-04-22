@@ -82,6 +82,7 @@ ptt_data = ptt_data %>%
 colnames(ptt_data)[which(names(ptt_data) == "_id")] <- "id"
 ```
 - 總共有 30篇dcard中山板的文、34篇高大板的文章、13篇考試板的文章、20篇ptt板的文章
+
 ### 將文章資料合在一起
 ```{r}
 #透過rbind將文章資料合起來
@@ -98,22 +99,26 @@ kable(article) %>%
   kable_styling(bootstrap_options = c("striped", "hover")) %>% 
   scroll_box(height = "300px")
 ```
+
+
+
 ### 整理留言資料
 - 留言資料為過濾完的文章資料下面的留言
 ```{r}
 nsysu_comment = nsysu_comment %>%
-  filter(nchar(nsysu_comment$content)>5)%>% #412
+  filter(nchar(nsysu_comment$content)>5)%>% 
   mutate(source="nsysu_dcard")
  nuk_comment = nuk_comment %>%
-  filter(nchar(nuk_comment$content)>5)%>% #501
+  filter(nchar(nuk_comment$content)>5)%>% 
    mutate(source="nuk_dcard")
  exam_comment = exam_comment %>%
-  filter(nchar(exam_comment$content)>5)%>% #978
+  filter(nchar(exam_comment$content)>5)%>% 
   mutate(source="exam_dcard")
 ptt_comment = ptt_comment %>%
-  filter(nchar(ptt_comment$content)>5)%>% #386
+  filter(nchar(ptt_comment$content)>5)%>% 
   mutate(source="ptt")
 ```
+
 ### 將留言資料合在一起
 ```{r}
 comment = nsysu_comment %>%
@@ -131,6 +136,7 @@ kable(comment) %>%
   kable_styling(bootstrap_options = c("striped", "hover")) %>% 
   scroll_box(height = "300px")
 ```
+
 ### 將留言資料和文章資料合起來
 ```{r}
 data = article%>%
@@ -139,6 +145,7 @@ kable(data) %>%
   kable_styling(bootstrap_options = c("striped", "hover")) %>% 
   scroll_box(height = "300px")
 ```
+
 
 ### 以日期計算文章數
 ```{r}
@@ -152,6 +159,10 @@ kable(head(data_count_by_date, 20)) %>%
   scroll_box(height = "300px")
 
 ```
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7c698d1136f4967186dcb9afc04a08f5c87c2555
 ### 畫出日期以及文章分布折線圖 
 ```{r message=FALSE, warning=FALSE}
 plot_date <- 
@@ -590,6 +601,8 @@ sentiment_plot_data %>%
   scale_x_date(labels = date_format("%m/%d")) 
 ```
 
+- 從情緒走勢圖可以看到正面情緒有兩個高峰，第一個高峰是2月初，第二個是在4月初；負面情緒則可發現是在4月初後大幅提高。2月初高峰原因在於有中山教授演講表明高大與中山會於2~3年之內合併。4月初後期，不論正負面情緒都大幅增加，原因是由於中山校方積極展開併校評估以及公聽會。
+
 ### 各來源的情緒走勢圖
 
 ```{r}
@@ -636,6 +649,8 @@ source_sentiment_plot_data %>%
   facet_wrap(~source)
 ```
 
+- 從高大Dcard來源來看，可以看到2月初正面情緒值非常高，原因在於高大學生得知併校消息，部分學生希望能延畢，拿到中山的畢業證書。此外也討論到企業愛用大學排名，排名中有中山大學，導致學生們更希望與中山併校，因此正面情緒值很高。不過在4月初可以發現負面情緒值提高，原因在於部分高大學生認為中山是覬覦高大的法律系，以及，不希望合併後是用中山的校名而對中山有不少負面言論。
+- 從中山Dcard來源來看，可以看到負面情緒大多都比正面情緒多，因為大部分中山的學生不希望與高大合併，擔心學校排名下降、畢業證書變得不值錢等，除此之外，由於看到高大板充滿攻擊中山的言論，因此中山與高大學生相互批評，這也導致負面情緒值高。
 
 ### 使用否定詞改變詞彙情緒值
 ```{r}
@@ -743,6 +758,8 @@ all_sentiments %>%
 
 ```
 
+- 正面情緒與原先結果差異不大
+
 ```{r}
 # 再比較負面情緒
 all_sentiments %>% 
@@ -751,6 +768,8 @@ all_sentiments %>%
   geom_line(aes(x=artDate,y=count,colour=sentiment))+
   scale_x_date(labels = date_format("%m/%d")) 
 ```
+
+- 負面情緒與原先結果差異不大
 
 ### 比較各來源否定詞相反情緒值後的情緒走勢
 ```{r}
@@ -773,6 +792,8 @@ all_sentiments %>%
   facet_wrap(~source)
 ```
 
+- 正面情緒與原先結果差異不大
+
 ```{r}
 # 再比較負面情緒
 all_sentiments %>% 
@@ -783,6 +804,7 @@ all_sentiments %>%
   facet_wrap(~source)
 ```
 
+- 負面情緒與原先結果差異不大
 
 ### 11gram - 尋找特定詞彙的前後5個詞彙
 ```{r}
@@ -854,6 +876,9 @@ tu_five_words_count %>%
   theme(text = element_text(family = "Heiti TC Light")) #加入中文字型設定，避免中文字顯示錯誤。
 ```
 
+- 從長條圖可以看到中山前後常出現高大、高醫與中山，由於是中山可能併的學校，因此常一起出現。
+- 從此之外，其他詞彙，像是:資源、校區、西子灣以及仁武，就是偏向討論中山的校地資源，推測可能是討論校地資源不足跟併校的關聯性。
+
 ### Word Correlation
 ```{r}
 # 計算兩個詞彙同時出現的總次數
@@ -865,6 +890,7 @@ kable(head(word_pairs, 100)) %>%
   kable_styling(bootstrap_options = c("striped", "hover")) %>% 
   scroll_box(height = "300px")
 ```
+- 結果跟想像的一樣，兩詞彙一起出現的次數多的都是與學校、併校有關。
 
 ```{r}
 # 計算兩個詞彙間的相關性
@@ -876,6 +902,7 @@ kable(head(word_cors,20)) %>%
   kable_styling(bootstrap_options = c("striped", "hover")) %>% 
   scroll_box(height = "300px")
 ```
+- 結果除了部分與word pairs一樣，有些不太一樣，像是:教育部與高醫，推論可能是中山大學是國立的，希望與私立的高醫併校，因此希望教育部能鬆綁限制。
 
 ```{r}
 # 顯示相關性大於0.398的組合
@@ -889,6 +916,9 @@ word_cors %>%
   geom_node_text(aes(label = name), repel = TRUE, family = "Heiti TC Light") + #加入中文字型設定，避免中文字顯示錯誤。
   theme_void()
 ```
+
+- 主要分兩大群，中間下面這群主要是與學校、併校有關，因為有出現像是:高大、高醫、併校等詞彙
+- 左上角這群主要是跟中山學生的擔心有關，因為出現詞彙像是:分數、排名與畢業。中山學生擔心的在於不希望中山的排名下降，也不希望學生用比較高的分數進來中山，畢業後卻與高大領一樣的畢業證書
 
 ### 計算tf-idf找出各來源討論中較獨特的詞彙
 ```{r}
@@ -921,6 +951,12 @@ total_words_tf_idf %>%
   coord_flip()
 ```
 
+- 在不同來源可以看到一些特別的詞彙。
+- 考試板因為會與各個學校比較，所以出現不少學校的名字，像是:北商、國北教、東華...等
+- 中山板因為談論到與高醫併校，因此有許多高醫相關的詞彙，像是:校董、校友會，此外也有中山併校本身相關的，像是西子灣、擴張等
+- 高大板因為如上面所述，因中山屬於企業愛用的大學，因此希望併校，所以內容有關職場
+- ptt則大多是新聞，所以談論到蔡秀芬副校長的聲明，中山設立醫學系的相關討論，像是大學讀基礎科學，研究所再讀醫學系等討論
+
 ### 各來源詞彙比例與詞頻長條圖
 ```{r message=FALSE, warning=FALSE}
 ggplot(total_words, aes(n/total, fill = source)) +
@@ -928,6 +964,8 @@ ggplot(total_words, aes(n/total, fill = source)) +
   xlim(NA, 0.01) +
   facet_wrap(~source, ncol = 2, scales = "free_y")
 ```
+
+- 各來源詞彙比例分布型態相近
 
 ### 討論併校的文章是否符合zip'f law
 ```{r}
@@ -947,6 +985,7 @@ freq_by_rank %>%
   scale_x_log10() +
   scale_y_log10()
 ```
+
 ### 依照lm模型結果繪製虛線
 ```{r}
 rank_subset <- freq_by_rank %>% 
@@ -960,3 +999,5 @@ freq_by_rank %>%
   scale_x_log10() +
   scale_y_log10()
 ```
+
+- 大致上符合zip'f law
