@@ -43,7 +43,12 @@ library(gtools)
 ```
 
 ### 載入文章及留言
+- 資料來源:
+  - dcard中山板、dcard高大板、dcard考試板各1000篇 約到去年10月
+  - ptt八卦板 去年10月到2019/4/19
+  - 分為文章以及留言，留言為過濾完的文章後的留言
 ```{r}
+
 nsysu_data = fread("data/my_csv_nsysu.csv",encoding = 'UTF-8')
 nuk_data =fread("data/my_csv_nuk.csv",encoding = 'UTF-8')
 exam_data =fread("data/my_csv_exam.csv",encoding = 'UTF-8')
@@ -52,7 +57,6 @@ nsysu_comment =fread("data/comment_nsysu.csv",encoding = 'UTF-8') #552
 nuk_comment =fread("data/comment_nuk.csv",encoding = 'UTF-8') #818
 ptt_comment =fread("data/comment_ptt.csv",encoding = 'UTF-8') #1024
 exam_comment =fread("data/comment_exam.csv",encoding = 'UTF-8') #1024
-# apple_data =fread("data/merge_apple_articleMetaData.csv",encoding = 'UTF-8') #蘋果資料不佳
 ```
 
 ### 整理文章資料
@@ -95,6 +99,7 @@ kable(article) %>%
   scroll_box(height = "300px")
 ```
 ### 整理留言資料
+- 留言資料為過濾完的文章資料下面的留言
 ```{r}
 nsysu_comment = nsysu_comment %>%
   filter(nchar(nsysu_comment$content)>5)%>% #412
@@ -147,7 +152,7 @@ kable(head(data_count_by_date, 20)) %>%
   scroll_box(height = "300px")
 
 ```
-### 利用ggplotly畫出日期以及文章分布折線圖 
+### 畫出日期以及文章分布折線圖 
 ```{r message=FALSE, warning=FALSE}
 plot_date <- 
   data_count_by_date %>% 
@@ -163,6 +168,7 @@ plot_date <-
 plot_date
 ```
 
+- 可以看到在三月底四月初時，有明顯熱烈討論的現象，因當時中山大學校方正在積極與高雄大學討論合併的事情，同時也展開公聽會等，讓大家可以更了解併校
 ### 增加結巴字典以及正規化function已得到tokens
 ```{r}
 jieba_tokenizer <- worker(user="dict/user_dict.txt", stop_word = "dict/stop_words.txt")
@@ -188,9 +194,8 @@ data_tokens$word = clean(data_tokens$word)
 data_tokens = data_tokens %>%
   filter(!word == "")
 ```
-### 文字雲
+### 計算詞彙的出現次數，如果詞彙只有一個字則不列入計算
 ```{r}
-# 計算詞彙的出現次數，如果詞彙只有一個字則不列入計算
 data_tokens_count <- data_tokens %>% 
   filter(nchar(.$word)>1) %>%
   group_by(word) %>% 
@@ -201,10 +206,20 @@ data_tokens_count <- data_tokens %>%
 kable(head(data_tokens_count,20)) %>% 
   kable_styling(bootstrap_options = c("striped", "hover")) %>% 
   scroll_box(height = "300px")
+```
 
+- 可以看到出現頻率高的字不外乎為中山、中山大學、併校、合併、高雄大學等等，令人感到神奇的是高醫，由於高醫之前也有在討論是否要併校，所以大家主要比較的對象，故頻率出現也較高
+
+### 文字雲
+```{r}
 data_tokens_count %>% wordcloud2()
 ```
+
+- 在文字圖當中，我們可以看到一些與併校十分相關的詞彙，像是科系、法學院、畢業證書等等，可以看出在社群媒體中，主要留言的為學生，比較重視自己的利益
+
+
 ### 過濾主題字查看常出現的詞彙
+- 將前面出現主題字過濾掉看一下詞彙，因為主題的詞彙，對我們來說，沒有什麼訊息
 ```{r}
 data_tokens_count %>%
   filter(!word %in% c("中山","大學","中山大學","高大","學校","高雄大學","國立","合校"))%>%
@@ -215,6 +230,9 @@ data_tokens_count %>%
   xlab(NULL) +
   coord_flip()
 ```
+
+- 可以看到高醫的比率以及校區、科系、畢業證書、企業等等，都是切身相關學生的議題
+
 ### 探討dcard上高大同學以及中山同學對於併校的看法
 ```{r}
 student_dcard = data_tokens%>%
@@ -229,6 +247,7 @@ student_dcard%>%
   geom_text(aes(label=sum), vjust=-0.3, size=3.5)
 ```
 
+- 兩邊的文章+留言數 數量為9178筆以及6787筆
 ### 計算詞彙在中山dcard版及高大dcard版出現比率的差異
 ```{r}
 frequency <- student_dcard%>%
@@ -242,6 +261,9 @@ kable(head(frequency,100)) %>%
   kable_styling(bootstrap_options = c("striped", "hover")) %>% 
   scroll_box(height = "300px")
 ```
+
+- 計算詞彙在中山dcard版及高大dcard版出現比率的差異
+
 ### 繪製出詞彙在中山dcard版及高大dcard版出現比率的差異
 ```{r message=FALSE, warning=FALSE}
 ggplot(frequency, aes(x = proportion, y = `nsysu_dcard`, color = abs(`nsysu_dcard` - proportion))) +
@@ -255,11 +277,14 @@ ggplot(frequency, aes(x = proportion, y = `nsysu_dcard`, color = abs(`nsysu_dcar
   labs(y = "nsysu_dcard", x = "nuk_dcard")
 ```
 
+- 根據上圖，可以看出中山的dcard板比較常出現的詞彙有西子灣、校務、土地、增加、公聽會，我認為主要為中山校方當時在準備舉辦公聽會，而中山學生主要在意的是若是合併，最大的好處應該是增加土地。
+- 根據上圖，可以看到高大的dcard板比較常出現的詞彙有企業、工作、能力等等，我認為是他們的學生主要探討的是若是和中山合併，他們在企業會大大的加分，可以得到更好的工作，但是也要考慮自己的能力等等的。
 ### 計算中山dcard以及高大dcard詞彙相關係數
 ```{r}
 cor.test(data = frequency[frequency$source == "nuk_dcard",],
          ~ proportion + `nsysu_dcard`)
 ```
+- 相關性算是偏高，應該是因為兩邊在探討一樣的議題，所使用的詞彙都差不多
 ### 準備LIWC中文情緒字典 
 ```{r}
 p <- read_file("dict/positive.txt")
@@ -302,7 +327,7 @@ plot_table %>%
   facet_grid(~source)
 ```
 
-看不出差異，手動增加字典
+- 看不出有什麼明顯的差異，等等會加入新的自定義字典
 
 ### 查看正面以及負面的情緒字
 ```{r message=FALSE, warning=FALSE}
@@ -322,9 +347,11 @@ student_dcard %>%
   coord_flip()
 ```
 
+- 可以看出在正面、負面詞較常出現的詞彙
 
-### 新增中山正面及負面字典
-
+### 新增對於中山的學生正面及負面字典
+- 新增負面字: 排名,畢業證書,經費,資源,分數,學店,距離,比較,補助,名字,素質,傻眼,競爭力,學歷,證書,改名,競爭,世界排名,科系,問題 
+- 新增正面字:校地,法律系,法學院,擴張,期待,開心,好處,成功,支持,想要,增加,利益,課程,進步,擴展,正面,值得,一流
 ```{r}
 p <- read_file("dict/nsysu_positive.txt")
 n <- read_file("dict/nsysu_negative.txt")
@@ -360,6 +387,8 @@ plot_table %>%
   geom_bar(stat="identity", width=0.5)
 ```
 
+可以看初中山dcard板的負面大於正面，主要是因為討論的內容對於中山的學生來說，主要都是會因為高大的排名或是分數等等的會讓中山的名氣下降，故負面大於正面
+
 ### 查看正面以及負面的情緒字
 ```{r message=FALSE, warning=FALSE}
 student_dcard %>% 
@@ -379,7 +408,13 @@ student_dcard %>%
   coord_flip()
 ```
 
-### 新增高大正面及負面字典
+- 在正面字當中，可以看到法律系、增加校地等，這些為主要若是合併後，高大能夠提供給中山的幾個好處。
+- 在負面字當中，可以看到問題、科系、排名、畢業證書，可以看到若是合併對於中山的影響有分很多方面，也同時會引起很多問題。
+
+### 新增對於高大的學生正面及負面字典
+
+- 正面字:企業,畢業,校名,畢業證書,排名,學歷,經費,想要,資源,升級,四大,願意,成功,競爭力,擴張,土地,期待,開心,好處,優勢
+- 負面字:不想,猴子,問題,學店,無聊,看不起,抱歉,不想,傻眼,距離,歧視,可憐,延畢,垃圾,貶低,
 ```{r}
 p <- read_file("dict/nuk_positive.txt")
 n <- read_file("dict/nuk_negative.txt")
@@ -415,6 +450,8 @@ plot_table %>%
   geom_bar(stat="identity", width=0.5)
 ```
 
+- 可以看到高大dcard板所呈現的情緒為正面大於負面的，主要是因為，他們所談論的詞彙主要都是對他們來說是正面效益的詞彙，根據情緒，可以推估他們會比較想要併校。
+
 ### 查看正面以及負面的情緒字
 ```{r message=FALSE, warning=FALSE}
 student_dcard %>% 
@@ -433,6 +470,8 @@ student_dcard %>%
   theme(text=element_text(size=14))+
   coord_flip()
 ```
+
+- 可以看出 對於高大的學生正面的詞彙有企業、校名、畢業證書、排名，這些對於學生來說是切身相關的資訊，而負面則有問題、學店、看不起等等詞彙。
 
 ### ngram
 
