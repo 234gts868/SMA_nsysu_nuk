@@ -76,10 +76,22 @@ ptt_data = ptt_data %>%
 colnames(ptt_data)[which(names(ptt_data) == "_id")] <- "id"
 
 
-head(nuk_data,10)
-head(nuk_data,10)
-head(exam_data,10)
-head(ptt_data,10)
+
+kable(head(nuk_data,100)) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
+
+kable(head(nuk_data,100)) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
+  
+kable(head(exam_data,100)) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
+
+kable(head(ptt_data,100)) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
+  scroll_box(height = "300px")
 ```
  總共有 30篇dcard中山板的文、30篇高大板的文章、29篇ptt板的文章
 ### 將文章資料合在一起
@@ -266,7 +278,7 @@ comment_tokens_count %>%
 
 ```
 
-探討dcar上高大同學以及中山同學對於併校的看法
+探討dcard上高大同學以及中山同學對於併校的看法
 ```{r}
 library(gtools)
 student_dcard =article_tokens %>%
@@ -481,7 +493,7 @@ total_words <- left_join(total_tokens_count, total_words_counts)
 #bind tf-idf
 total_words_tf_idf <- total_words %>%
   bind_tf_idf(word, source, n)
-total_words_tf_idf
+total_words_tf_idf 
 ```
 
 ```{r}
@@ -566,7 +578,7 @@ article_comment <- article %>%
 article_comment_bigram <- article_comment %>%
   unnest_tokens(bigram, artContent, token = jieba_bigram)
 
-article_comment_bigram
+head(article_comment_bigram, 100) 
 ```
 
 ##載入各種字典
@@ -634,11 +646,7 @@ article_comment_sentiment_bigrams <- article_comment_sentiment_bigrams %>%
 
 article_comment_sentiment_bigrams
 ```
-```{r}
-article_comment_sentiment_bigrams %>%
-  filter(source =='nuk_dcard') %>%
-  count(sentiment_tag) %>% View()
-```
+
 
 ```{r}
 # 生成一個時間段中的 日期和情緒標籤的所有可能組合
@@ -668,7 +676,7 @@ sentiment_plot_data %>%
   scale_x_date(labels = date_format("%m/%d")) 
 ```
 
-##各版的情緒走勢圖
+##各板的情緒走勢圖
 
 ```{r}
 
@@ -755,7 +763,7 @@ negated_sentiment_plot_data %>%
   scale_x_date(labels = date_format("%m/%d")) 
 ```
 
-##各版的情緒走勢圖
+##各板的情緒走勢圖
 
 ```{r}
 
@@ -876,7 +884,8 @@ id_total_tokens <- total_tokens %>%
 
 word_pairs <- id_total_tokens %>%
   pairwise_count(word, id, sort = TRUE)
-word_pairs
+
+head(word_pairs, 100) 
 ```
 
 ```{r}
@@ -885,8 +894,9 @@ word_cors <- id_total_tokens %>%
   group_by(word) %>%
   filter(n() >= 20) %>%
   pairwise_cor(word, id, sort = TRUE)
-word_cors
+head(word_cors,20)
 ```
+
 ```{r}
 # 顯示相關性大於0.4的組合
 set.seed(2019)
