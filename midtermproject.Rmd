@@ -7,7 +7,16 @@ output:
     theme: flatly
     css: style.css
 ---
+## 一、動機和分析目的
+- 近期中山大學校方與高雄大學校方積極在討論併校的議題，因為我們有一股中山魂，因此想瞭解學校的議題，即使快要畢業，但是併校此議題對於身為中山大學學生的我們影響依舊很大，而且會影響學弟妹的未來，所以想做關於併校議題的分析。我們透過分析得知網路上各種來源(ptt、Dcard的高大板、中山板、考試板)的看法，進而歸納出結論。
 
+## 二、資料集的描述
+- 從網路來源──Dcard、ptt、facebook、蘋果日報，三個來源來分析，但是我們發現facebook的中山大學社團中山大小事，討論的文章沒有明顯的留言討論，僅有互相tag，所以我們就沒有將facebook的資料進行分析，而蘋果日報的部分由於是討論併校的新聞較少，這部分也不做分析，最後我們取dcard中山板、dcard高大板、dcard考試板、ptt八卦板的資料進行分析。
+dcard中山板、dcard高大板、dcard考試板各1000篇 約到去年10月
+ptt八卦板 去年10月到2019/4/19
+進行篩選後，總共有 30篇dcard中山板的文、34篇高大板的文章、13篇考試板的文章、20篇ptt板的文章
+
+## 三、資料的分析過程、結果與解釋
 ### 系統設置
 ```{r}
 Sys.setlocale("LC_CTYPE", "cht")
@@ -276,8 +285,9 @@ student_dcard%>%
   geom_text(aes(label=sum), vjust=-0.3, size=3.5)
 ```
 
-- 兩邊的文章+留言數 數量為9178筆以及6787筆
-### 計算詞彙在中山dcard版及高大dcard版出現比率的差異
+- 兩邊的文章+留言字數 數量為9178筆以及6787筆
+
+### 計算詞彙在中山dcard板及高大dcard板出現比率的差異
 ```{r}
 frequency <- student_dcard%>%
   dplyr::count(source, word)%>%
@@ -291,9 +301,9 @@ kable(head(frequency,100)) %>%
   scroll_box(height = "300px")
 ```
 
-- 計算詞彙在中山dcard版及高大dcard版出現比率的差異
+- 計算詞彙在中山dcard板及高大dcard板出現比率的差異
 
-### 繪製出詞彙在中山dcard版及高大dcard版出現比率的差異
+### 繪製出詞彙在中山dcard板及高大dcard板出現比率的差異
 ```{r message=FALSE, warning=FALSE}
 ggplot(frequency, aes(x = proportion, y = `nsysu_dcard`, color = abs(`nsysu_dcard` - proportion))) +
   geom_abline(color = "gray40", lty = 2) +
@@ -332,7 +342,7 @@ kable(head(LIWC_ch,100)) %>%
   scroll_box(height = "300px")
 ```
 
-### 使用LIWC中文情緒字典應用於中山及高大dcard版詞彙
+### 使用LIWC中文情緒字典應用於中山及高大dcard板詞彙
 ```{r message=FALSE, warning=FALSE}
 sentiment_dcard = student_dcard %>%
    filter(nchar(.$word)>1) %>%
@@ -1119,7 +1129,7 @@ dtm_matrix[1:10,1:20]
 ```
 
 ### 開啟平行運算
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(doParallel)
 clust = makeCluster(detectCores())
 registerDoParallel(clust); getDoParWorkers()
@@ -1159,6 +1169,7 @@ sapply(L, function(x) x%>% colMeans %>% sort %>% tail %>% names)
 - 我們可以看到分成6群，第一群不太明顯，第二群有畢業證書，第三群是跟工作相關的，第四群是美國跟基礎科學，第五群是關於校方的相關詞彙，第六群是別間的學校
 
 +尺度縮減 (縮減成2維)
+
 ### 在二維平面圖上以文字雲分析不同群的字
 
 ### 首先將dtm做尺度縮減至二維
@@ -1183,7 +1194,7 @@ g = cutree(hc_Y,K)        # cut into K clusters
 table(g) %>% as.vector %>% sort         # sizes of clusters
 ```
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(randomcoloR)
 library(wordcloud)
 
@@ -1382,32 +1393,32 @@ merge_documents_spread_count
 ```
 
 ### LDAvis
-# ```{r}
-# topicmodels_json_ldavis <- function(fitted, doc_term){
-#   require(LDAvis)
-#   require(slam)
-#   
+```{r}
+#  topicmodels_json_ldavis <- function(fitted, doc_term){
+#    require(LDAvis)
+#    require(slam)
+# 
 #   # Find required quantities
 #   phi <- as.matrix(posterior(fitted)$terms)
 #   theta <- as.matrix(posterior(fitted)$topics)
 #   vocab <- colnames(phi)
 #   term_freq <- slam::col_sums(doc_term)
-#   
+# 
 #   # Convert to json
 #   json_lda <- LDAvis::createJSON(phi = phi, theta = theta,
 #                                  vocab = vocab,
 #                                  doc.length = as.vector(table(doc_term$i)),
 #                                  term.frequency = term_freq)
-#   
+# 
 #   return(json_lda)
 # }
-# ```
-# 
-# ```{r}
+```
+
+```{r}
 # merge_lda <- LDA(merge_dtm, k = 4, control = list(seed = 1))
-# ```
-# 
-# ```{r}
+```
+
+```{r}
 # json_res <- topicmodels_json_ldavis(merge_lda,merge_dtm)
 # 
 # # serVis(json_res,open.browser = T,encoding="UTF-8")
@@ -1416,6 +1427,11 @@ merge_documents_spread_count
 # serVis(json_res, out.dir = "vis", open.browser = T)
 # writeLines(iconv(readLines("./vis/lda.json"), to = "UTF8"),
 #        file("./vis/lda.json", encoding="UTF-8"))
-# serVis(json_res,open.browser = T)
-# ```
+#  serVis(json_res,open.browser = T)
+```
+
+## 四、結論
+- 在社群媒體的部分，三月底開始明顯熱烈討論的現象，因當時中山大學校方正在積極與高雄大學討論合併的事情，同時也展開公聽會等，讓大家可以更了解併校。
+- 在中山dcard、高大dcard板的資料，透過自定義的情緒辭典做出的情緒分析，我們知道兩校對於併校議題有不一樣的看法，對於中山的學生普遍對於併校議題負面大於正面，若是併校，會因為高大的排名或是分數等等的會讓中山的名氣下降，故負面大於正面，在高大dcard板所呈現的情緒為正面大於負面的，主要是因為，他們所談論的詞彙主要都是對他們來說是正面效益的詞彙，根據情緒，可以推估他們會比較想要併校。
+- 從情緒走勢圖中，可分析出:高大雖然正面情緒數大於負面情緒數，但不同時期有不同變化，尤其在四月初，負面情緒值變高，探究原因後可以得知是由於高大學生不滿併校後，校名是中山大學而不是高雄大學。
 
