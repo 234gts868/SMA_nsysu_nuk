@@ -1,7 +1,7 @@
 ---
 title: "SMA"
 author: "Bolun Lin"
-date: "2019年4月19日   "
+date: "2019年4月19日 "
 output: 
   html_document:
     highlight: pygments
@@ -9,9 +9,16 @@ output:
     css: style.css
 ---
 
+### 系統設置
+```{r}
+Sys.setlocale("LC_CTYPE", "cht")
+```
+
+
+
 ### 準備所需要的library
 ```{r message=FALSE, warning=FALSE}
- packages = c("dplyr", "tidytext", "stringr", "wordcloud2","tidyverse",'knitr','kableExtra','NLP','plotly', "ggplot2",'readr','data.table','reshape2','wordcloud','tidyr','scales','jiebaR','sentimentr','htmltools',"ggraph", "igraph", "reshape2", "widyr","gtools")
+ packages = c("dplyr", "tidytext", "stringr", "wordcloud2","tidyverse",'knitr','kableExtra','NLP', "ggplot2",'readr','data.table','reshape2','tidyr','scales','jiebaR','htmltools',"ggraph", "igraph", "reshape2", "widyr","gtools")
  existing = as.character(installed.packages()[,1])
  for(pkg in packages[!(packages %in% existing)]) install.packages(pkg)
 ```
@@ -20,12 +27,10 @@ output:
 library(dplyr)
 library(stringr)
 require(tidytext)
-library(sentimentr)
 library(wordcloud2)
 require(data.table)
 require(ggplot2)
 require(reshape2)
-require(wordcloud)
 require(tidyr)
 require(readr)
 require(scales)
@@ -35,11 +40,11 @@ library(knitr)
 library(kableExtra)
 library(NLP)
 library(ggraph)
-library(plotly)
 library(igraph)
 library(reshape2)
 library(widyr)
 library(gtools)
+library(htmltools)
 ```
 
 ### 載入文章及留言
@@ -177,6 +182,7 @@ plot_date
 ```
 
 - 可以看到在三月底四月初時，有明顯熱烈討論的現象，因當時中山大學校方正在積極與高雄大學討論合併的事情，同時也展開公聽會等，讓大家可以更了解併校
+
 ### 增加結巴字典以及正規化function已得到tokens
 ```{r}
 jieba_tokenizer <- worker(user="dict/user_dict.txt", stop_word = "dict/stop_words.txt")
@@ -202,6 +208,7 @@ data_tokens$word = clean(data_tokens$word)
 data_tokens = data_tokens %>%
   filter(!word == "")
 ```
+
 ### 計算詞彙的出現次數，如果詞彙只有一個字則不列入計算
 ```{r}
 data_tokens_count <- data_tokens %>% 
@@ -220,10 +227,11 @@ kable(head(data_tokens_count,20)) %>%
 
 ### 文字雲
 ```{r}
-data_tokens_count %>% wordcloud2()
+#data_tokens_count %>% wordcloud2()
 ```
+![](img/wordcloud_tokens.PNG) 
 
-- 在文字圖當中，我們可以看到一些與併校十分相關的詞彙，像是科系、法學院、畢業證書等等，可以看出在社群媒體中，主要留言的為學生，比較重視自己的利益
+- 在文字雲當中，我們可以看到一些與併校十分相關的詞彙，像是科系、法學院、畢業證書等等，可以看出在社群媒體中，主要留言的為學生，比較重視自己的利益
 
 
 ### 過濾主題字查看常出現的詞彙
@@ -287,12 +295,14 @@ ggplot(frequency, aes(x = proportion, y = `nsysu_dcard`, color = abs(`nsysu_dcar
 
 - 根據上圖，可以看出中山的dcard板比較常出現的詞彙有西子灣、校務、土地、增加、公聽會，我認為主要為中山校方當時在準備舉辦公聽會，而中山學生主要在意的是若是合併，最大的好處應該是增加土地。
 - 根據上圖，可以看到高大的dcard板比較常出現的詞彙有企業、工作、能力等等，我認為是他們的學生主要探討的是若是和中山合併，他們在企業會大大的加分，可以得到更好的工作，但是也要考慮自己的能力等等的。
+
 ### 計算中山dcard以及高大dcard詞彙相關係數
 ```{r}
 cor.test(data = frequency[frequency$source == "nuk_dcard",],
          ~ proportion + `nsysu_dcard`)
 ```
 - 相關性算是偏高，應該是因為兩邊在探討一樣的議題，所使用的詞彙都差不多
+
 ### 準備LIWC中文情緒字典 
 ```{r}
 p <- read_file("dict/positive.txt")
@@ -308,6 +318,7 @@ kable(head(LIWC_ch,100)) %>%
   kable_styling(bootstrap_options = c("striped", "hover")) %>% 
   scroll_box(height = "300px")
 ```
+
 ### 使用LIWC中文情緒字典應用於中山及高大dcard版詞彙
 ```{r message=FALSE, warning=FALSE}
 sentiment_dcard = student_dcard %>%
@@ -323,6 +334,7 @@ kable(sentiment_dcard) %>%
   kable_styling(bootstrap_options = c("striped", "hover")) %>% 
   scroll_box(height = "300px")
 ```
+
 ### 繪製出圖表
 ```{r}
 plot_table<-sentiment_dcard %>%
@@ -395,7 +407,7 @@ plot_table %>%
   geom_bar(stat="identity", width=0.5)
 ```
 
-可以看初中山dcard板的負面大於正面，主要是因為討論的內容對於中山的學生來說，主要都是會因為高大的排名或是分數等等的會讓中山的名氣下降，故負面大於正面
+- 可以看初中山dcard板的負面大於正面，主要是因為討論的內容對於中山的學生來說，主要都是會因為高大的排名或是分數等等的會讓中山的名氣下降，故負面大於正面
 
 ### 查看正面以及負面的情緒字
 ```{r message=FALSE, warning=FALSE}
@@ -646,8 +658,8 @@ source_sentiment_plot_data %>%
   facet_wrap(~source)
 ```
 
-- 從高大Dcard來源來看，可以看到2月初正面情緒值非常高，原因在於高大學生得知併校消息，部分學生希望能延畢，拿到中山的畢業證書。此外也討論到企業愛用大學排名，排名中有中山大學，導致學生們更希望與中山併校，因此正面情緒值很高。不過在4月初可以發現負面情緒值提高，原因在於部分高大學生認為中山是覬覦高大的法律系，以及，不希望合併後是用中山的校名而對中山有不少負面言論。
-- 從中山Dcard來源來看，可以看到負面情緒大多都比正面情緒多，因為大部分中山的學生不希望與高大合併，擔心學校排名下降、畢業證書變得不值錢等，除此之外，由於看到高大板充滿攻擊中山的言論，因此中山與高大學生相互批評，這也導致負面情緒值高。
+- 從高大Dcard來源來看，可以看到2月初正面情緒值非常高，原因在於高大學生得知併校消息，部分學生希望能延畢，拿到中山的畢業證書。此外2月也釋出了2019年企業愛用的大學排行，而排行中有中山大學，導致學生們更希望與中山併校，因此正面情緒值很高。不過在4月初可以發現負面情緒值提高，原因在於部分高大學生認為中山是覬覦高大的法律系，以及，高大學生不希望合併後是用中山的校名，因此對中山有不少負面言論。
+- 從中山Dcard來源來看，可以看到負面情緒大多都比正面情緒多，因為大部分中山的學生不希望與高大合併，擔心學校排名下降、畢業證書變得不值錢等，除此之外，中山學生由於看到高大板充滿攻擊中山的言論，導致兩校學生相互批評，這也導致負面情緒值變高。
 
 ### 使用否定詞改變詞彙情緒值
 ```{r}
