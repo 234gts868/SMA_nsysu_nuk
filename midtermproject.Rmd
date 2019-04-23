@@ -1,5 +1,5 @@
 ---
-title: "SMA"
+title: "透過社群媒體分析探討中山大學與高雄大學合併議題"
 date: "2019年4月19日 "
 output: 
   html_document:
@@ -537,7 +537,7 @@ jieba_bigram <- function(t) {
 ```
 
 ### 執行bigram斷詞
-```{r}
+```{r message=FALSE, warning=FALSE}
 article_comment <- article %>% 
   smartbind(comment)
 article_comment_bigram <- article_comment %>%
@@ -936,7 +936,7 @@ kable(head(word_cors,20)) %>%
 ```
 - 結果除了部分與word pairs一樣，有些不太一樣，像是:教育部與高醫，推論可能是中山大學是國立的，希望與私立的高醫併校，因此希望教育部能鬆綁限制。
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # 顯示相關性大於0.398的組合
 set.seed(2019)
 word_cors %>%
@@ -1166,7 +1166,7 @@ L$`1`[1:10,1:10]
 sapply(L, function(x) x%>% colMeans %>% sort %>% tail %>% names)
 ```
 
-- 我們可以看到分成6群，第一群不太明顯，第二群有畢業證書，第三群是跟工作相關的，第四群是美國跟基礎科學，第五群是關於校方的相關詞彙，第六群是別間的學校
+- 我們可以看到分成6群，第一、二群很接近，第三群則是跟新鮮(人)、調查、企業上與工作相關的，第四群是校董與三間學校，第五群是關於中山與高醫，第六群是選系與基礎科學及國北教
 
 +尺度縮減 (縮減成2維)
 
@@ -1285,7 +1285,8 @@ merge_top_terms %>%
   coord_flip()
 ```
 
-- topic1主要跟校名有關；topic2不太明顯；topic3與高醫的董事會、校友會有關；topic4也不明顯
+- topic1主要跟校長、校董與董事會有關；topic2不太明顯，但可以看到法學院(高大的法律系)、排名與分數；topic3與中山大學校長鄭英耀、評估、討論有關；topic4也不明顯，但也可以看到與topic2類似的分數、科系
+
 
 ###查看組別間差異最大的詞
 ```{r}
@@ -1344,7 +1345,7 @@ merge_topic_ratio_all %>%
   coord_flip()
 ```
 
-- 1的話因為主題跟校名有關，因此會出現優越這種特別字；3的話因為是跟高醫董事會與校友會有關，因此會出現內定這種特別字，因為校友會批高醫董事長是內定的。2跟4主題不明顯因此無法解釋
+- 1的話因為主題跟校董名有關，因此會出現校董這種特別字；3的話因為是跟鄭英耀與討論有關，因此會出現四屆、談過這種特別字。2跟4主題不明顯因此無法解釋
 
 
 ### $\theta$ matrix  (document * topic)
@@ -1392,46 +1393,11 @@ merge_documents_spread_count <- merge_documents_spread %>% mutate(cat=ifelse(top
 merge_documents_spread_count
 ```
 
-### LDAvis
-```{r}
-#  topicmodels_json_ldavis <- function(fitted, doc_term){
-#    require(LDAvis)
-#    require(slam)
-# 
-#   # Find required quantities
-#   phi <- as.matrix(posterior(fitted)$terms)
-#   theta <- as.matrix(posterior(fitted)$topics)
-#   vocab <- colnames(phi)
-#   term_freq <- slam::col_sums(doc_term)
-# 
-#   # Convert to json
-#   json_lda <- LDAvis::createJSON(phi = phi, theta = theta,
-#                                  vocab = vocab,
-#                                  doc.length = as.vector(table(doc_term$i)),
-#                                  term.frequency = term_freq)
-# 
-#   return(json_lda)
-# }
-```
-
-```{r}
-# merge_lda <- LDA(merge_dtm, k = 4, control = list(seed = 1))
-```
-
-```{r}
-# json_res <- topicmodels_json_ldavis(merge_lda,merge_dtm)
-# 
-# # serVis(json_res,open.browser = T,encoding="UTF-8")
-# 
-# # 如果無法開啟視窗(windows用戶)可執行這段
-# serVis(json_res, out.dir = "vis", open.browser = T)
-# writeLines(iconv(readLines("./vis/lda.json"), to = "UTF8"),
-#        file("./vis/lda.json", encoding="UTF-8"))
-#  serVis(json_res,open.browser = T)
-```
 
 ## 四、結論
 - 在社群媒體的部分，三月底開始明顯熱烈討論的現象，因當時中山大學校方正在積極與高雄大學討論合併的事情，同時也展開公聽會等，讓大家可以更了解併校。
 - 在中山dcard、高大dcard板的資料，透過自定義的情緒辭典做出的情緒分析，我們知道兩校對於併校議題有不一樣的看法，對於中山的學生普遍對於併校議題負面大於正面，若是併校，會因為高大的排名或是分數等等的會讓中山的名氣下降，故負面大於正面，在高大dcard板所呈現的情緒為正面大於負面的，主要是因為，他們所談論的詞彙主要都是對他們來說是正面效益的詞彙，根據情緒，可以推估他們會比較想要併校。
-- 從情緒走勢圖中，可分析出:高大雖然正面情緒數大於負面情緒數，但不同時期有不同變化，尤其在四月初，負面情緒值變高，探究原因後可以得知是由於高大學生不滿併校後，校名是中山大學而不是高雄大學。
+- 本來設想來源為高大板文章大多是正面詞彙，但透過情緒走勢圖可以發現並不是如此，情緒走勢圖分析了:高大雖然正面情緒數大於負面情緒數，但不同時期有不同變化，尤其在四月初，負面情緒值變高，探究原因後可以得知是由於高大學生不滿併校後，校名是中山大學而不是高雄大學。
+- 在層級式分群與主題模型中，我們發現效果並不是很好，應該是因為全部的文章都是找跟高大與中山合併的議題，所以文章的主題都是圍繞在兩校的併校，使用主題模型分類會使用較細的主題來做區分，像是「兩校的分數與科系」、「校長與董事會」、「公聽會與小組評估」等等，導致其實兩個主題差不多的文章卻被歸類為不同的主題。
+
 
