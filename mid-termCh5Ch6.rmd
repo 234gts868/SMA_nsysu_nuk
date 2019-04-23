@@ -1,0 +1,505 @@
+---
+title: "midterm_Ch5&Ch6"
+output:
+  html_document:
+    df_print: paged
+authors: yeeyan Chen
+---
+
+# 系統設置
+```{r}
+Sys.setlocale(category = "LC_ALL", locale = "zh_TW.UTF-8") # For ubuntu
+# Sys.setlocale("LC_CTYPE", "cht") # For windows.
+```
+
+### 準備所需要的library
+```{r message=FALSE, warning=FALSE}
+ packages = c("dplyr", "tidytext", "stringr", "wordcloud2","tidyverse",'knitr','kableExtra','NLP', "ggplot2",'readr','data.table','reshape2','tidyr','scales','jiebaR','htmltools',"ggraph", "igraph", "reshape2", "widyr","gtools","tm","quanteda","Matrix","slam","Rtsne","randomcoloR","magrittr","topicmodels","LDAvis","webshot","htmlwidgets","servr","doParallel")
+ existing = as.character(installed.packages()[,1])
+ for(pkg in packages[!(packages %in% existing)]) install.packages(pkg)
+```
+
+## 安裝需要的packages
+```{r}
+library(dplyr)
+library(stringr)
+require(tidytext)
+library(wordcloud2)
+require(data.table)
+require(ggplot2)
+require(reshape2)
+require(tidyr)
+require(readr)
+require(scales)
+library(jiebaR)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(NLP)
+library(ggraph)
+library(igraph)
+library(reshape2)
+library(widyr)
+library(gtools)
+library(htmltools)
+library(data.table)
+require(tm)
+require(quanteda)
+require(Matrix)
+require(slam)
+require(Rtsne)
+require(randomcoloR)
+
+require(magrittr)
+require(topicmodels)
+require(LDAvis)
+require(webshot)
+require(htmlwidgets)
+require(servr)
+```
+
+```{r}
+nsysu_data = fread("data/my_csv_nsysu.csv",encoding = 'UTF-8')
+nuk_data =fread("data/my_csv_nuk.csv",encoding = 'UTF-8')
+exam_data =fread("data/my_csv_exam.csv",encoding = 'UTF-8')
+ptt_data =fread("data/ptt.csv",encoding = 'UTF-8')
+nsysu_comment =fread("data/comment_nsysu.csv",encoding = 'UTF-8') #552
+nuk_comment =fread("data/comment_nuk.csv",encoding = 'UTF-8') #818
+ptt_comment =fread("data/comment_ptt.csv",encoding = 'UTF-8') #1024
+exam_comment =fread("data/comment_exam.csv",encoding = 'UTF-8') #1024
+
+nsysu_data = nsysu_data %>%
+  filter(grepl("高大|併校|合併|合校|高雄大學|公聽會",content)|grepl("高大|併校|合併|合校|高雄大學|公聽會",title))%>%
+  mutate(source = "nsysu_dcard")
+nuk_data = nuk_data %>%
+   filter(grepl("中山|併校|合併|合校|中山大學|公聽會",content)|grepl("中山|併校|合併|合校|中山大學|公聽會",title)) %>%
+  filter(!(grepl("愛滋",content)|grepl("愛滋",title))) %>%
+  mutate(source = "nuk_dcard")
+
+exam_data = exam_data %>%
+   filter(grepl("併校|合併|合校|公聽會",content)|grepl("併校|合併|合校|公聽會",title)) %>%
+   filter(grepl("高大|中山|高雄大學",content)|grepl("高大|中山|高雄大學",title)) %>%
+  mutate(source = "exam_dcard")
+ptt_data = ptt_data %>%
+   filter(grepl("併校|合併|合校|公聽會",artTitle)|grepl("併校|合併|合校|公聽會",artContent)) %>%
+   filter(grepl("高大|中山|高雄大學",artTitle)|grepl("高大|中山|高雄大學",artContent)) %>%
+   filter(!(grepl("山手線|賽馬|手線|高雄縣市合併|又老又窮|清大或交大合校",artTitle)|grepl("山手線|賽馬|手線|大甲",artContent))) %>% 
+  mutate(source = "ptt")
+colnames(ptt_data)[which(names(ptt_data) == "_id")] <- "id"
+
+article = nsysu_data %>%
+   select(id,createdAt ,source ,title,content)%>% 
+   rbind(nuk_data %>% select(id,createdAt ,source ,title,content))%>%
+   rbind(exam_data %>% select(id,createdAt ,source ,title,content))
+colname = c("id", "artDate","source","artTitle","artContent")
+colnames(article) <- colname
+article = article %>%
+  rbind(ptt_data %>% select(id,artDate ,source ,artTitle,artContent))
+
+article$artDate = as.Date(article$artDate)
+article
+
+jieba_tokenizer <- worker(user="dict/user_dict.txt", stop_word = "dict/stop_words.txt")
+clean = function(txt) {
+  txt = gsub("B\\w+", "", txt) #去除@或#後有數字,字母,底線 (標記人名或hashtag)
+  txt = gsub("(http|https)://.*", "", txt) #去除網址
+  txt = gsub("[ \t]{2,}", "", txt) #去除兩個以上空格或tab
+  txt = gsub("\\n"," ",txt) #去除換行
+  txt = gsub("\\s+"," ",txt) #去除一個或多個空格
+  txt = gsub("^\\s+|\\s+$","",txt) #去除前後一個或多個空格
+  txt = gsub("&.*;","",txt) #去除html特殊字元編碼
+  txt = gsub("[a-zA-Z0-9?!. ']","",txt) #除了字母,數字 ?!. ,空白的都去掉
+  txt }
+
+tokenizer <- function(t) {
+  lapply(t, function(x) {
+    tokens <- segment(x, jieba_tokenizer)
+    return(tokens)
+  })
+}
+article_tokens <- article %>% 
+  unnest_tokens(word, artContent, token=tokenizer)
+article_tokens$word = clean(article_tokens$word)
+article_tokens = article_tokens %>%
+  filter(!word == "")
+
+comment_tokens <- comment %>% 
+  unnest_tokens(word, artContent, token=tokenizer)
+comment_tokens$word = clean(comment_tokens$word)
+comment_tokens = comment_tokens %>%
+  filter(!word == "")
+```
+
+
+
+### 將文章與留言合併
+```{r}
+article_data <- article %>% select(id,artTitle)
+article_test <- article %>% filter(source=="ptt") %>% mutate(id=row_number())
+comment_tokens <- inner_join(article_data,comment_tokens,by=c("id"="id"))
+
+article_comment = smartbind(article_tokens,comment_tokens)
+```
+
+### 計算每個詞在該文章的詞頻
+```{r}
+article_comment <- article_comment %>% 
+  count(id,artTitle,artDate,source,word) %>% 
+  rename(count=n)
+
+article_comment
+```
+
+
+### 我們先用tf-idf過濾一些字
+### 選出artTitle,word,count三個欄位
+```{r}
+tidy_merge <- article_comment %>%
+  select(artTitle,word,count)
+tidy_merge
+
+merge_tf_idf <- tidy_merge %>%
+  bind_tf_idf(word, artTitle, count) %>%
+  arrange(desc(tf_idf))
+
+merge_tf_idf
+```
+
+### 計算出每個word的平均tfidf
+### 找出那些tfidf值較低的word
+```{r}
+term_avg_tfidf=merge_tf_idf %>%
+  group_by(word) %>%
+  summarise(
+    tfidf_avg=mean(tf_idf)
+  )
+
+term_avg_tfidf<-term_avg_tfidf %>% arrange(desc(tfidf_avg))
+
+term_avg_tfidf$tfidf_avg %>% summary
+```
+
+```{r}
+term_remove=term_avg_tfidf %>%
+  filter(tfidf_avg<0.007099) %>%
+  .$word
+
+term_remove %>% head
+```
+
+### 原來6597個字過濾後約剩下4947個字；97個document剩下92個
+```{r}
+dtm_merge = merge_tf_idf %>%
+  filter(!word %in% term_remove) %>%
+  cast_dtm(document=artTitle,term=word,value= count)
+
+dtm_merge
+```
+
+### 列出前幾筆，可以發現稀疏矩陣
+```{r}
+dtm_matrix=dtm_merge %>% as.data.frame.matrix
+dtm_matrix[1:10,1:20]
+```
+
+### 開啟平行運算
+```{r}
+library(doParallel)
+clust = makeCluster(detectCores())
+registerDoParallel(clust); getDoParWorkers()
+```
+
+```{r}
+t0 = Sys.time()
+d=dtm_matrix %>%
+  dist(method="euclidean")  #歐式距離，算文章與文章之間的距離
+Sys.time() - t0
+```
+
+```{r}
+t0 = Sys.time()
+hc = hclust(d, method='ward.D')   # 階層式分群 的 華德法
+plot(hc, labels = FALSE)
+rect.hclust(hc, k=6, border="red")  #會由上而下，依照距離，分出在計算hclust時最後三個才合併的cluster
+Sys.time() - t0
+```
+
+#![](img/hclust.png)
+
+### 觀察樹狀圖，分成3群
+```{r}
+kg = cutree(hc, k=6)
+L = split(dtm_matrix, kg)
+
+L$`1`[1:10,1:10]
+```
+
+### 觀察3群中最常見的字
+
+```{r}
+sapply(L, function(x) x%>% colMeans %>% sort %>% tail %>% names)
+```
+
+- 我們可以看到分成6群，第一群不太明顯，第二群有畢業證書，第三群是跟工作相關的，第四群是美國跟基礎科學，第五群是關於校方的相關詞彙，第六群是別間的學校
+
++尺度縮減 (縮減成2維)
+### 在二維平面圖上以文字雲分析不同群的字
+
+### 首先將dtm做尺度縮減至二維
+```{r}
+t0 = Sys.time()
+n = 1000 #n個字
+tsne = dtm_merge[, 1:n] %>% as.data.frame.matrix %>%
+  scale %>% t %>% Rtsne(
+    check_duplicates = FALSE, theta=0.0, max_iter=3200)
+Sys.time()-t0
+```
+
+```{r}
+Y = tsne$Y              # tSNE coordinates
+
+d_Y = dist(Y)             # distance matrix
+hc_Y = hclust(d_Y )          # hi-clustering
+plot(hc_Y,label=F)
+rect.hclust(hc_Y, k=12, border="red")
+K = 12              # number of clusters
+g = cutree(hc_Y,K)        # cut into K clusters
+table(g) %>% as.vector %>% sort         # sizes of clusters
+```
+
+```{r}
+library(randomcoloR)
+library(wordcloud)
+
+wc = col_sums(dtm_merge[,1:n]) #n個字
+colors = distinctColorPalette(K)
+
+
+png("./merge.png", width=3200, height=1800)#輸出圖片到路徑下
+textplot(
+  Y[,1], Y[,2], colnames(dtm_merge)[1:n], show=F,
+  col=colors[g],
+  cex= 0.3 + 1.25 * sqrt(wc/mean(wc)),
+  font=2)
+dev.off()
+```
+
+1000字文字雲圖片:
+
+#![](img/merge.png)
+
+
+
+### 將資料轉換為Document Term Matrix (DTM)
+```{r}
+merge_dtm <- article_comment %>% cast_dtm(id, word, count)
+merge_dtm
+
+```
+
+### 查看DTM矩陣，可以發現是個稀疏矩陣。 
+```{r}
+inspect(merge_dtm[1:10,1:10])
+```
+
+### 建立LDA模型
+```{r}
+merge_lda <- LDA(merge_dtm, k = 4, control = list(seed = 1))
+```
+
+### $\phi$ Matrix
+
+### 查看$\phi$ matrix (topic * term)
+```{r}
+merge_topics <- tidy(merge_lda, matrix = "beta") 
+# 注意，在tidy function裡面要使用"beta"來取出Phi矩陣。
+merge_topics
+#從merge_topics中可以得到特定主題生成特定詞彙的概率。
+```
+
+### 尋找Topic的代表字
+```{r}
+merge_top_terms <- merge_topics %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+merge_top_terms
+```
+
+```{r}
+merge_top_terms %>%
+  mutate(term = reorder(term, beta)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip()
+```
+
+- 可以看到4個topic的代表字都施中山、高大、併校等等的詞彙，但這不是我們要的結果，因為我們的data本來就是抓有討論併校議題的文章，因此我們要去除這些字
+
+### 手動把一些常出現、跨主題共享的詞彙移除。
+```{r}
+remove_words <- c("中山", "併","高大","合併","學校","大學","中山大學","高雄大學","說","校","人","想","高","好","學生","知道","覺得","高雄","後","喔")
+
+merge_top_terms <- merge_topics %>%
+  filter(! term %in% remove_words) %>% 
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+merge_top_terms %>%
+  mutate(term = reorder(term, beta)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip()
+```
+
+- topic1主要跟校名有關；topic2不太明顯；topic3與高醫的董事會、校友會有關；topic4也不明顯
+
+###查看組別間差異最大的詞
+```{r}
+#1
+beta_spread_1 <- merge_topics %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  spread(topic, beta) %>%
+  filter(topic1 > .0004 | topic2 > .0004 | topic3 > .0004 | topic4 > .0004) %>% 
+  mutate(log_ratio = log2(topic1 / (topic2+topic3+topic4)))
+
+merge_topic_ratio_1 <- beta_spread_1 %>% top_n(10,wt = log_ratio) %>%
+  arrange(desc(log_ratio)) %>% mutate(topic=1)
+merge_topic_ratio_1
+
+#2
+beta_spread_2 <- merge_topics %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  spread(topic, beta) %>%
+  filter(topic1 > .0004 | topic2 > .0004 | topic3 > .0004 | topic4 > .0004) %>% 
+  mutate(log_ratio = log2(topic2 / (topic1+topic3+topic4)))
+
+merge_topic_ratio_2 <- beta_spread_2 %>% top_n(10,wt = log_ratio) %>%
+  arrange(desc(log_ratio)) %>% mutate(topic=2)
+merge_topic_ratio_2
+
+#3
+beta_spread_3 <- merge_topics %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  spread(topic, beta) %>%
+  filter(topic1 > .0004 | topic2 > .0004 | topic3 > .0004 | topic4 > .0004) %>% 
+  mutate(log_ratio = log2(topic3 / (topic1+topic2+topic4)))
+
+merge_topic_ratio_3 <- beta_spread_3 %>% top_n(10,wt = log_ratio) %>%
+  arrange(desc(log_ratio)) %>% mutate(topic=3)
+merge_topic_ratio_3
+
+#4
+beta_spread_4 <- merge_topics %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  spread(topic, beta) %>%
+  filter(topic1 > .0004 | topic2 > .0004 | topic3 > .0004 | topic4 > .0004) %>% 
+  mutate(log_ratio = log2(topic4 / (topic1+topic2+topic3)))
+
+merge_topic_ratio_4 <- beta_spread_4 %>% top_n(10,wt = log_ratio) %>%
+  arrange(desc(log_ratio)) %>% mutate(topic=4)
+merge_topic_ratio_4
+```
+
+```{r}
+merge_topic_ratio_all <- rbind(merge_topic_ratio_1,merge_topic_ratio_2,merge_topic_ratio_3,merge_topic_ratio_4)
+merge_topic_ratio_all %>% 
+  ggplot(aes(x = reorder(term, log_ratio), y = log_ratio , fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  xlab("word")+
+  coord_flip()
+```
+
+- 1的話因為主題跟校名有關，因此會出現優越這種特別字；3的話因為是跟高醫董事會與校友會有關，因此會出現內定這種特別字，因為校友會批高醫董事長是內定的。2跟4主題不明顯因此無法解釋
+
+
+### $\theta$ matrix  (document * topic)
+### 查看$\theta$ matrix
+```{r}
+merge_documents <- tidy(merge_lda, matrix="gamma") # 在tidy function中使用參數"gamma"來取得 theta矩陣。
+merge_documents
+```
+
+```{r}
+topic_doc_content <- merge_documents %>% 
+  group_by(document) %>% 
+  top_n(1,gamma) %>%
+  arrange(topic) %>%
+  inner_join(article, by = c("document" = "id")) %>% 
+  select(topic, artContent)
+
+topic_doc_content
+
+topic_doc_title <- merge_documents %>% 
+  group_by(document) %>% 
+  top_n(1,gamma) %>%
+  arrange(topic) %>%
+  inner_join(article, by = c("document" = "id")) %>% 
+  select(topic, artTitle)
+
+topic_doc_title
+```
+
+
+### 計算各個topic各個詞頻，畫成文字雲
+
+### merge_documents 轉成寬資料框
+```{r}
+merge_documents_spread <- merge_documents %>% 
+  mutate(topic = paste0("topic", topic)) %>% 
+  spread(topic, gamma)
+```
+
+
+### 各個topic的document數
+```{r}
+merge_documents_spread_count <- merge_documents_spread %>% mutate(cat=ifelse(topic1>topic2 & topic1>topic3 & topic1>topic4,"topic1",ifelse(topic2>topic1 & topic2>topic3 & topic2>topic4,"topic2",ifelse(topic3>topic1 & topic3>topic2 & topic3>topic4,"topic3","topic4")))) %>% count(cat)
+
+merge_documents_spread_count
+```
+
+### LDAvis
+```{r}
+topicmodels_json_ldavis <- function(fitted, doc_term){
+  require(LDAvis)
+  require(slam)
+  
+  # Find required quantities
+  phi <- as.matrix(posterior(fitted)$terms)
+  theta <- as.matrix(posterior(fitted)$topics)
+  vocab <- colnames(phi)
+  term_freq <- slam::col_sums(doc_term)
+  
+  # Convert to json
+  json_lda <- LDAvis::createJSON(phi = phi, theta = theta,
+                                 vocab = vocab,
+                                 doc.length = as.vector(table(doc_term$i)),
+                                 term.frequency = term_freq)
+  
+  return(json_lda)
+}
+```
+
+```{r}
+merge_lda <- LDA(merge_dtm, k = 4, control = list(seed = 1))
+```
+
+```{r}
+json_res <- topicmodels_json_ldavis(merge_lda,merge_dtm)
+
+# serVis(json_res,open.browser = T,encoding="UTF-8")
+
+# 如果無法開啟視窗(windows用戶)可執行這段
+serVis(json_res, out.dir = "vis_new", open.browser = T)
+writeLines(iconv(readLines("./vis_new/lda.json"), to = "UTF8"),
+       file("./vis/lda.json", encoding="UTF-8"))
+serVis(json_res,open.browser = T)
+```
+
