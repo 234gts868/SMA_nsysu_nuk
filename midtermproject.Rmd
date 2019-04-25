@@ -13,50 +13,52 @@ output:
 - 併校背景:
 - 高等教育深耕計畫的競爭趨勢
 
-#![](img/literature/01.png)
+![](img/literature/01.png)
 - 上圖可以看到兩校的優勢，中山有著豐富的產學合作績效以及漂亮的學科與企業最愛學生排名，而且在研究型大學中唯一一個有海洋科學院；高大則校地面積廣大，而且有高雄地區唯一一間的法學院。
 
-#![](img/literature/02.png)
+![](img/literature/02.png)
 - 接下來是兩校的劣勢，可以看到中山相反地校地小，而且教師世代交替影響研究能量；高大資源不足、研究生人數少。兩校規模都小，不利國際競爭。
 
-#![](img/literature/03.png)
-#![](img/literature/04.png)
-#![](img/literature/05.png)
+![](img/literature/03.png)
+![](img/literature/04.png)
+![](img/literature/05.png)
 - 從這三張圖可以看不論是在學生、教師或是行政人員人數，中山都比高大多很多，人力資源上中山較優渥，而且 從上圖來看，中山的研究所學生數為4699，高大研究所為1288，兩者相差3.6倍，反映出中山的定位是研究型大學，高大則是教學型大學。
 
 另外可以看到其實兩校重疊的學院不少，只有海科學院及法學院是沒有重疊的
 
-#![](img/literature/06.png)
+![](img/literature/06.png)
 中山屬於邁向頂尖大學計畫的12校之一，而且高等教育深耕計畫拿到的補助也是高醫的兩倍多，加上入學學生人數較多，因此中山的各項財政收入明顯高於高大
 
-#![](img/literature/07.png)
+![](img/literature/07.png)
 - 可以看到中山面積雖然有73公頃，但是有6成的土地是山坡地無法使用，反觀高大有足足82公頃，而且全部皆可使用，可用校地面積廣大，這是高大有而中山沒有的優勢之處。
 但是在助學金上中山因為財政較佳(從上張圖可以看到)，所以提供給學生的助學金較優渥。
 
 - 綜合以上幾個論點，可以得知兩校相比，中山的優勢在人數、資金與國際聲望；高大則在於可用校地與法學院。
 
-#![](img/literature/08.png)
+![](img/literature/08.png)
 - 可以看到兩校合併後校地可以大過台、清、交+陽，而且雖然其他數據還是比這四間還低，但是仍然提升不少
 
 
 - 合校後面臨的問題，有很多個面向，包括組織、法規、教師、職員工、學生、空間、國際聲望、校名等等，我們選幾個來說明
 
 - 1.組織:
-#![](img/literature/合校問題-組織.png)
+![](img/literature/合校問題-組織.png)
 - 即使兩校的系所有很多是相同的，但在整合上仍需要考慮如何分配教師、學生數量、經費及空間規劃，不同系所間也要考慮到以變動性最小且要有互補性的方式去執行。
 
 - 2.空間:
-#![](img/literature/合校問題-空間.png)
+![](img/literature/合校問題-空間.png)
 - 多了高大的土地空間，高大的校區可以規劃成「高雄創新科技基地」，以及新建教研大樓，還有貴重儀器的搬遷等等，這些成本與設計都需要去仔細評估與考量。
 
 - 3.校名與國際聲望:
-#![](img/literature/合校問題-國際聲望.png)
-#![](img/literature/管院-國際認證.png)
-#![](img/literature/品牌.png)
+![](img/literature/合校問題-國際聲望.png)
+![](img/literature/管院-國際認證.png)
+![](img/literature/品牌.png)
 - 兩校合併後該改成甚麼名字，中山考慮到如果以學術聲望的QS世界大學排名來看，在國際上「中山」已成功建立了學校品牌，如果改名恐造成學校的聲望下降，而且管理學院原本的國際認證都將化為烏有，所以應該以「中山」作為兩校合併後的名字，但是實際名字仍需要與高大協商以及教育部核准。
 
+- 參考資料來源:中山大學與高雄大學合校評估:https://drive.google.com/file/d/1rypWsul5Xxa7hdHci2Wrs9ObCLw8zySv/view?fbclid=IwAR18a35VJ1t2AL9ubRugi2Z2NQfuFiGP2OYOxnVosGiyDA2AwMn_M9Dze8I
+
 ## 二、動機和分析目的
-- 近期中山大學校方與高雄大學校方積極在討論併校的議題，因為我們有一股中山魂，因此想瞭解學校的議題，即使快要畢業，但是併校此議題對於身為中山大學學生的我們影響依舊很大，而且會影響學弟妹的未來，所以想做關於併校議題的分析。我們透過分析得知網路上各種來源(ptt、Dcard的高大板、中山板、考試板)的看法，進而歸納出結論。
+- 近期中山大學校方與高雄大學校方積極在討論併校的議題，因為我們有一股中山魂，因此想瞭解學校的議題，即使快要畢業，但是併校此議題對於身為中山大學學生的我們影響依舊很大，而且會影響學弟妹的未來，所以想做關於併校議題的分析。我們透過分析得知網路上各種來源(ptt、Dcard的高大板、中山板、考試板)的看法，進而歸納出結論。由於網路上資料大部分為學生所張貼的內容，因此分析結果可能偏向為學生對於併校議題的看法。
 
 ## 三、資料集的描述
 - 從網路來源──Dcard、ptt、facebook、蘋果日報，三個來源來分析，但是我們發現facebook的中山大學社團中山大小事，討論的文章沒有明顯的留言討論，僅有互相tag，所以我們就沒有將facebook的資料進行分析，而蘋果日報的部分由於是討論併校的新聞較少，這部分也不做分析，最後我們取dcard中山板、dcard高大板、dcard考試板、ptt八卦板的資料進行分析。
@@ -418,7 +420,7 @@ plot_table %>%
   facet_grid(~source)
 ```
 
-- 看不出有什麼明顯的差異，等等會加入新的自定義字典
+- 看不出有什麼明顯的差異，因此會再加入新的自定義字典
 
 ### 查看正面以及負面的情緒字
 ```{r message=FALSE, warning=FALSE}
@@ -565,6 +567,7 @@ student_dcard %>%
 - 可以看出 對於高大的學生正面的詞彙有企業、校名、畢業證書、排名，這些對於學生來說是切身相關的資訊，而負面則有問題、學店、看不起等等詞彙。
 
 ### ngram
+- 目的在於得知否定詞對於情緒的結果是否有很大的影響，以及找出特定詞彙的相關性。
 
 ### bigram function
 ```{r}
@@ -773,49 +776,7 @@ negated_sentiment_plot_data %>%
   scale_x_date(labels = date_format("%m/%d")) 
 ```
 
-### 各來源否定詞改變後的情緒走勢圖
-```{r}
-# 計算我們資料集中 每日的情緒值
-source_negated_sentiment_plot_data <- article_comment_sentiment_bigrams_negated %>%
-  group_by(source, artDate,sentiment_tag) %>%
-  summarise(count=n())  
-# 將所有 "日期與情緒值的所有可能組合" 與 "每日的情緒值" join起來
-# 如果資料集中某些日期沒有文章或情緒值，會出現NA
-# 我們用0取代NA
-source_negated_sentiment_plot_data <- rbind(
-  all_dates %>% 
-  merge(source_negated_sentiment_plot_data %>% 
-          filter(source == "nsysu_dcard")
-        ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
-        all.x=T,all.y=T) %>% 
-  mutate(source = "nsysu_dcard"), 
-  all_dates %>% 
-  merge(source_negated_sentiment_plot_data %>% 
-          filter(source == "nuk_dcard")
-        ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
-        all.x=T,all.y=T) %>% 
-  mutate(source = "nuk_dcard"), 
-  all_dates %>% 
-  merge(source_negated_sentiment_plot_data %>% 
-          filter(source == "exam_dcard")
-        ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
-        all.x=T,all.y=T) %>% 
-  mutate(source = "exam_dcard"), 
-  all_dates %>% 
-  merge(source_negated_sentiment_plot_data %>% 
-          filter(source == "ptt")
-        ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
-        all.x=T,all.y=T) %>% 
-  mutate(source = "ptt") 
-  ) %>% 
-  mutate(count = replace_na(count, 0))
-# 畫圖
-source_negated_sentiment_plot_data %>%
-  ggplot()+
-  geom_line(aes(x=artDate,y=count,colour=sentiment))+
-  scale_x_date(labels = date_format("%m/%d")) + 
-  facet_wrap(~source)
-```
+- 此圖看不出與原先的差異，因此接著做否定詞情緒值改變後，正與負面情緒走勢與原先的情緒走勢差別
 
 ### 比較否定詞相反情緒值後的情緒走勢
 ```{r}
@@ -850,43 +811,10 @@ all_sentiments %>%
 ```
 
 - 負面情緒與原先結果差異不大
+- 不論是正面情緒詞語負面情緒詞，將否定詞的情緒值相反後可以發現差異不大，原因在於否定詞的詞彙佔整體詞彙比例低，因此不會嚴重影響原先的結果。
 
-### 比較各來源否定詞相反情緒值後的情緒走勢
-```{r}
-# 合併兩種情緒值的資料
-all_sentiments <- bind_rows(
-  source_sentiment_plot_data %>% mutate(sentiment=paste(sentiment, "_original", sep = "")),
-  source_negated_sentiment_plot_data %>% mutate(sentiment=paste(sentiment, "_negated", sep = ""))) 
-kable(all_sentiments) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
-  scroll_box(height = "300px")
-```
 
-```{r}
-# 先比較正面情緒
-all_sentiments %>% 
-  filter(sentiment %in% c("positive_original", "positive_negated")) %>%
-  ggplot()+
-  geom_line(aes(x=artDate,y=count,colour=sentiment))+
-  scale_x_date(labels = date_format("%m/%d")) +
-  facet_wrap(~source)
-```
-
-- 正面情緒與原先結果差異不大
-
-```{r}
-# 再比較負面情緒
-all_sentiments %>% 
-  filter(sentiment %in% c("negative_original", "negative_negated")) %>%
-  ggplot()+
-  geom_line(aes(x=artDate,y=count,colour=sentiment))+
-  scale_x_date(labels = date_format("%m/%d")) + 
-  facet_wrap(~source)
-```
-
-- 負面情緒與原先結果差異不大
-
-### 11gram - 尋找特定詞彙的前後5個詞彙
+### 11gram - 尋找 "中山" 出現的前後五個詞彙
 ```{r}
 # ngram function, where n=11
 ngram_11 <- function(t) {
@@ -913,12 +841,8 @@ article_comment_ngram_11 <- article_comment %>%
 ngrams_11_separated <- article_comment_ngram_11 %>%
   separate(ngram, paste0("word", c(1:11),sep=""), sep = " ")
   
-kable(ngrams_11_separated) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
-  scroll_box(height = "300px")
 ```
 
-### 尋找 "中山" 出現的前後五個詞彙
 ```{r}
 # 尋找 "中山" 出現的前後五個詞彙
 tu_five_words <- ngrams_11_separated %>%
@@ -970,7 +894,7 @@ kable(head(word_pairs, 100)) %>%
   kable_styling(bootstrap_options = c("striped", "hover")) %>% 
   scroll_box(height = "300px")
 ```
-- 結果跟想像的一樣，兩詞彙一起出現的次數多的都是與學校、併校有關。
+- 結果跟預期的一樣，兩詞彙一起出現的次數多的都是與學校、併校有關。
 
 ```{r}
 # 計算兩個詞彙間的相關性
@@ -1033,54 +957,10 @@ total_words_tf_idf %>%
 
 - 在不同來源可以看到一些特別的詞彙。
 - 考試板因為會與各個學校比較，所以出現不少學校的名字，像是:北商、國北教、東華...等
-- 中山板因為談論到與高醫併校，因此有許多高醫相關的詞彙，像是:校董、校友會，此外也有中山併校本身相關的，像是西子灣、擴張等
+- 中山板因為談論到與高醫併校，因此有許多高醫相關的詞彙，像是:校董、校友會，原因在於提到高醫董事會與校友會對於併校的態度，高醫的校友會與學生會希望能藉由併校削弱高醫的校董對高醫的控制權。此外其他詞彙也有中山併校本身相關的詞彙，像是西子灣、擴張等
 - 高大板因為如上面所述，因中山屬於企業愛用的大學，因此希望併校，所以內容有關職場
 - ptt則大多是新聞，所以談論到蔡秀芬副校長的聲明，中山設立醫學系的相關討論，像是大學讀基礎科學，研究所再讀醫學系等討論
 
-### 各來源詞彙比例與詞頻長條圖
-```{r message=FALSE, warning=FALSE}
-ggplot(total_words, aes(n/total, fill = source)) +
-  geom_histogram(show.legend = FALSE) +
-  xlim(NA, 0.01) +
-  facet_wrap(~source, ncol = 2, scales = "free_y")
-```
-
-- 各來源詞彙比例分布型態相近
-
-### 討論併校的文章是否符合zip'f law
-```{r}
-freq_by_rank <- total_words %>% 
-  group_by(source) %>% 
-  arrange(desc(n)) %>% 
-  mutate(rank = row_number(), 
-         `term frequency` = n/total)
-
-kable(freq_by_rank) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover")) %>% 
-  scroll_box(height = "300px")
-
-freq_by_rank %>% 
-  ggplot(aes(rank, `term frequency`, color = source)) + 
-  geom_line(size = 1.1, alpha = 0.8, show.legend = FALSE) + 
-  scale_x_log10() +
-  scale_y_log10()
-```
-
-### 依照lm模型結果繪製虛線
-```{r}
-rank_subset <- freq_by_rank %>% 
-  filter(rank < 500,
-         rank > 10)
-lm(log10(`term frequency`) ~ log10(rank), data = rank_subset)
-freq_by_rank %>% 
-  ggplot(aes(rank, `term frequency`, color = source)) + 
-  geom_abline(intercept = -1.417  , slope = -0.730, color = "gray50", linetype = 2) +
-  geom_line(size = 1.1, alpha = 0.8, show.legend = FALSE) + 
-  scale_x_log10() +
-  scale_y_log10()
-```
-
-- 大致上符合zip'f law
 
 ### 層級式分群
 ### 合併tokens
@@ -1345,7 +1225,6 @@ merge_top_terms %>%
 library(magrittr)
 library(dplyr)
 a <- article_comment %>% select(artContent)
-a
 
 #1
 beta_spread_1 <- merge_topics %>%
@@ -1407,51 +1286,12 @@ merge_topic_ratio_all %>%
 - 2跟4主題不明顯因此無法解釋
 
 
-### $\theta$ matrix  (document * topic)
-### 查看$\theta$ matrix
-```{r}
-merge_documents <- tidy(merge_lda, matrix="gamma") # 在tidy function中使用參數"gamma"來取得 theta矩陣。
-merge_documents
-```
-
-### 查看每一個文章所屬的topic與其內容及標題
-```{r}
-topic_doc_content <- merge_documents %>% 
-  group_by(document) %>% 
-  top_n(1,gamma) %>%
-  arrange(topic) %>%
-  inner_join(article, by = c("document" = "id")) %>% 
-  select(topic, artContent)
-
-topic_doc_content
-
-topic_doc_title <- merge_documents %>% 
-  group_by(document) %>% 
-  top_n(1,gamma) %>%
-  arrange(topic) %>%
-  inner_join(article, by = c("document" = "id")) %>% 
-  select(topic, artTitle)
-
-topic_doc_title
-```
-
-### 各個topic的document數
-```{r}
-merge_documents_spread <- merge_documents %>% 
-  mutate(topic = paste0("topic", topic)) %>% 
-  spread(topic, gamma)
-
-merge_documents_spread_count <- merge_documents_spread %>% mutate(cat=ifelse(topic1>topic2 & topic1>topic3 & topic1>topic4,"topic1",ifelse(topic2>topic1 & topic2>topic3 & topic2>topic4,"topic2",ifelse(topic3>topic1 & topic3>topic2 & topic3>topic4,"topic3","topic4")))) %>% count(cat)
-
-merge_documents_spread_count
-```
-
-
 ## 五、結論
 - 在社群媒體的部分，三月底開始明顯熱烈討論的現象，因當時中山大學校方正在積極與高雄大學討論合併的事情，同時也展開公聽會等，讓大家可以更了解併校。
 - 在中山dcard、高大dcard板的資料，透過自定義的情緒辭典做出的情緒分析，我們知道兩校對於併校議題有不一樣的看法，對於中山的學生普遍對於併校議題負面大於正面，若是併校，會因為高大的排名或是分數等等的會讓中山的名氣下降，故負面大於正面，在高大dcard板所呈現的情緒為正面大於負面的，主要是因為，他們所談論的詞彙主要都是對他們來說是正面效益的詞彙，根據情緒，可以推估他們會比較想要併校。
 - 本來設想來源為高大板文章大多是正面詞彙，但透過情緒走勢圖可以發現並不是如此，情緒走勢圖分析了:高大雖然正面情緒數大於負面情緒數，但不同時期有不同變化，尤其在四月初，負面情緒值變高，探究原因後可以得知是由於高大學生不滿併校後，校名是中山大學而不是高雄大學。
 - 在層級式分群與主題模型中，我們發現效果並不是很好，應該是因為全部的文章都是找跟高大與中山合併的議題，所以文章的主題都是圍繞在兩校的併校，使用主題模型分類會使用較細的主題來做區分，像是「兩校的分數與科系」、「校長與董事會」、「公聽會與小組評估」等等，導致其實兩個主題差不多的文章卻被歸類為不同的主題。
 - 從這些文章有找到關於產學合作的字眼，透過上網查詢可以發現其實中山想要跟高大合併有部分是因為高大在北高雄，而路竹科學園區、楠梓加工出口區、橋頭科學園區都在北高雄，因此中山想跟這些科學園區產學合作，似乎為了要能法人化，擺脫教育部嚴格的監讀管理。
+- 分析的資料大多為學生的看法，透過分析可以得知在併校議題中，學生關注的部分為何。由於教授、校方或是校友的資料取得較困難，因此無法比較各身分的看法是否有差別，進而使分析結果更加完整。
 
 
