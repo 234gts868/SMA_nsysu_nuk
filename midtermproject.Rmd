@@ -1304,6 +1304,45 @@ merge_topic_ratio_all %>%
 - 3的話因為主題是跟鄭英耀與討論有關，因此會出現四屆(留言區談到中山高大合併後第一屆將由中山招生的話，原本高大那四屆即將畢業的學生的畢業證書該如何註明學校)、談過這種特別字。「康乃爾」是鄭英耀校長表示康乃爾大學是公私合併的成功典範，不能僅侷限思考私立跟私立、公立跟公立的整併，所以才出現這個字
 - 2跟4主題不明顯因此無法解釋
 
+### LDAvis
+```{r}
+topicmodels_json_ldavis <- function(fitted, doc_term){
+    require(LDAvis)
+    require(slam)
+
+    # Find required quantities
+    phi <- as.matrix(posterior(fitted)$terms)
+    theta <- as.matrix(posterior(fitted)$topics)
+    vocab <- colnames(phi)
+    term_freq <- slam::col_sums(doc_term)
+
+    # Convert to json
+    json_lda <- LDAvis::createJSON(phi = phi, theta = theta,
+                            vocab = vocab,
+                            doc.length = as.vector(table(doc_term$i)),
+                            term.frequency = term_freq)
+
+    return(json_lda)
+}
+```
+
+```{r}
+merge_lda <- LDA(merge_dtm, k = 4, control = list(seed = 1))
+
+# 設置alpha及delta參數
+#devotion_lda_removed <- LDA(devotion_dtm_removed, k = 4, method = "Gibbs", control = list(seed = 1234, alpha = 2, delta= 0.1))
+
+json_res <- topicmodels_json_ldavis(merge_lda,merge_dtm)
+
+# serVis(json_res,open.browser = T)
+
+# 如果無法開啟視窗(windows用戶)可執行這段
+serVis(json_res, out.dir = "vis", open.browser = T)
+writeLines(iconv(readLines("./vis/lda.json")),
+       file("./vis/lda.json", encoding="UTF-8"))
+```
+
+- 從以上的LDAvis分析的圖可以看到topic1與topic2蠻接近的，主要是談論中山校方對兩校併校的看法與評估以及學生的畢業證書及學校分數，所以topic2出現中山校長鄭英耀以及副校長蔡秀芬還有評估、公聽會等等的字眼；topic3則是講到高醫的董事會與校友會的關係，因為兩方長期處於對立的關係，校友會不滿董事會長期做的事，如果併校了可能會影響到校董的勢力；topic4則是與併校對兩校的未來的影響有關係，所以出現學校的「指標、分數、選系」以及企業「最愛」用的大學生等等關於學校的表現。
 
 ## 五、結論
 - 在社群媒體的部分，三月底開始明顯熱烈討論的現象，因當時中山大學校方正在積極與高雄大學討論合併的事情，同時也展開公聽會等，讓大家可以更了解併校。
