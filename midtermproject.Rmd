@@ -122,14 +122,12 @@ library(reshape2)
 library(widyr)
 library(gtools)
 library(htmltools)
-
 require(tm)
 require(quanteda)
 require(Matrix)
 require(slam)
 require(Rtsne)
 require(randomcoloR)
-
 require(magrittr)
 require(topicmodels)
 require(LDAvis)
@@ -149,10 +147,10 @@ nsysu_data = fread("data/my_csv_nsysu.csv",encoding = 'UTF-8')
 nuk_data =fread("data/my_csv_nuk.csv",encoding = 'UTF-8')
 exam_data =fread("data/my_csv_exam.csv",encoding = 'UTF-8')
 ptt_data =fread("data/ptt.csv",encoding = 'UTF-8')
-nsysu_comment =fread("data/comment_nsysu.csv",encoding = 'UTF-8') #552
-nuk_comment =fread("data/comment_nuk.csv",encoding = 'UTF-8') #818
-ptt_comment =fread("data/comment_ptt.csv",encoding = 'UTF-8') #1024
-exam_comment =fread("data/comment_exam.csv",encoding = 'UTF-8') #1024
+nsysu_comment =fread("data/comment_nsysu.csv",encoding = 'UTF-8') 
+nuk_comment =fread("data/comment_nuk.csv",encoding = 'UTF-8') 
+ptt_comment =fread("data/comment_ptt.csv",encoding = 'UTF-8') 
+exam_comment =fread("data/comment_exam.csv",encoding = 'UTF-8') 
 ```
 
 ### 整理文章資料
@@ -234,7 +232,7 @@ kable(comment) %>%
 ```
 
 ### 將留言資料和文章資料合起來
-```{r}
+```{r message=FALSE, warning=FALSE}
 data = article%>%
   smartbind(comment)
 kable(data) %>% 
@@ -267,7 +265,7 @@ plot_date <-
   ggtitle("高大與中山併校 討論文章數") + 
   xlab("日期") + 
   ylab("數量") + 
-  theme(text = element_text(family = "Heiti TC Light")) #加入中文字型設定，避免中文字顯示錯誤。
+  theme(text = element_text(family = "Heiti TC Light")) 
 
 plot_date
 ```
@@ -586,14 +584,10 @@ student_dcard %>%
 - 可以看出 對於高大的學生正面的詞彙有企業、校名、畢業證書、排名，這些對於學生來說是切身相關的資訊，而負面則有問題、學店、看不起等等詞彙。
 
 ### ngram
-- 目的在於得知否定詞對於情緒的結果是否有很大的影響，以及找出特定詞彙的相關性。
+- 目的在於得知否定詞對於併校議題情緒的結果是否有很大的影響，以及找出特定詞彙的相關性。
 
 ### bigram function
 ```{r}
-# remove stopwords
-# unnest_tokens 使用的bigram分詞函數
-# Input: a character vector
-# Output: a list of character vectors of the same length
 jieba_bigram <- function(t) {
   lapply(t, function(x) {
     if(nchar(x)>1){
@@ -631,11 +625,10 @@ negation_words <- scan(file = "./dict/negation_words.txt", what=character(),sep=
 ### ngram 結合 情緒分析
 ```{r}
 # 將bigram拆成word1和word2
-# 將包含英文字母或和數字的詞彙清除
 bigrams_separated <- article_comment_bigram %>%
   filter(!str_detect(bigram, regex("[0-9a-zA-Z]"))) %>%
   separate(bigram, c("word1", "word2"), sep = " ")
-# 並選出word2爲情緒詞的bigram
+# 並選出word2爲情緒詞
 #去除wrod1與word2都是stop word
 bigrams_separated  <- bigrams_separated %>%
   filter(!(word1 %in% stop_words & word2 %in% stop_words)) 
@@ -663,10 +656,7 @@ kable(article_comment_sentiment_bigrams) %>%
 
 ### 將positive與negative給予情緒值
 ```{r}
-# 選出word2中，有出現在情緒詞典中的詞彙
-# 如果是正面詞彙則賦予： 情緒標籤爲"positive"、情緒值爲  1
-# 如果是負面詞彙則賦予： 情緒標籤爲"negative"、情緒值爲 -1
-#將正負面詞分開
+# 計算情緒值，positive為1，negative為-1
 article_comment_sentiment_bigrams <- article_comment_sentiment_bigrams %>% rename(sentiment_tag = sentiment)
 article_comment_sentiment_bigrams <- article_comment_sentiment_bigrams %>% 
   mutate(sentiment = ifelse(sentiment_tag == "positive",1,-1)) %>%
@@ -679,18 +669,16 @@ kable(article_comment_sentiment_bigrams) %>%
 
 ### 繪製情緒走勢圖
 ```{r}
-# 生成一個時間段中的 日期和情緒標籤的所有可能組合
+# 產生討論併校文章最早到最近的每天的日期
 all_dates <- 
   expand.grid(seq(as.Date(min(article_comment_sentiment_bigrams$artDate)), as.Date(max(article_comment_sentiment_bigrams$artDate)), by="day"), c("positive", "negative"))
 names(all_dates) <- c("artDate", "sentiment")
 
-# 計算我們資料集中 每日的情緒值
+# 計算每日的情緒值
 sentiment_plot_data <- article_comment_sentiment_bigrams %>%
   group_by(artDate,sentiment_tag) %>%
   summarise(count=n())  
-# 將所有 "日期與情緒值的所有可能組合" 與 "每日的情緒值" join起來
-# 如果資料集中某些日期沒有文章或情緒值，會出現NA
-# 我們用0取代NA
+
 sentiment_plot_data <- all_dates %>% 
   merge(sentiment_plot_data,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
         all.x=T,all.y=T) %>% 
@@ -712,9 +700,8 @@ sentiment_plot_data %>%
 source_sentiment_plot_data <- article_comment_sentiment_bigrams %>%
   group_by(source, artDate,sentiment_tag) %>%
   summarise(count=n())  
-# 將所有 "日期與情緒值的所有可能組合" 與 "每日的情緒值" join起來
-# 如果資料集中某些日期沒有文章或情緒值，會出現NA
-# 我們用0取代NA
+
+#計算各來源情緒
 source_sentiment_plot_data <- rbind(
   all_dates %>% 
   merge(source_sentiment_plot_data %>% 
@@ -756,7 +743,7 @@ source_sentiment_plot_data %>%
 
 ### 使用否定詞改變詞彙情緒值
 ```{r}
-# 查看 前面出現否定詞 且 後面爲情緒詞彙 的組合
+# 查看前面有否定詞的情緒詞 
 kable(article_comment_sentiment_bigrams %>%
   filter(word1 %in% negation_words) %>%
   count(word1, word2, sort = TRUE) ) %>% 
@@ -777,18 +764,16 @@ kable(article_comment_sentiment_bigrams_negated) %>%
 
 ### 繪製否定詞改變後的情緒走勢圖
 ```{r}
-# 計算我們資料集中 每日的情緒值
+# 計算每日的情緒值
 negated_sentiment_plot_data <- article_comment_sentiment_bigrams_negated %>%
   group_by(artDate,sentiment_tag) %>%
   summarise(count=n())  
-# 將所有 "日期與情緒值的所有可能組合" 與 "每日的情緒值" join起來
-# 如果資料集中某些日期沒有文章或情緒值，會出現NA
-# 我們用0取代NA
+
 negated_sentiment_plot_data <- all_dates %>% 
   merge(negated_sentiment_plot_data,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
         all.x=T,all.y=T) %>% 
   mutate(count = replace_na(count, 0))
-# 最後把圖畫出來
+# 畫圖
 negated_sentiment_plot_data %>%
   ggplot()+
   geom_line(aes(x=artDate,y=count,colour=sentiment), size = 1.2)+
@@ -809,7 +794,7 @@ kable(all_sentiments) %>%
 ```
 
 ```{r}
-# 先比較正面情緒
+# 正面情緒
 all_sentiments %>% 
   filter(sentiment %in% c("positive_negated", "positive_original")) %>% 
   ggplot()+
@@ -821,7 +806,7 @@ all_sentiments %>%
 - 正面情緒與原先結果差異不大
 
 ```{r}
-# 再比較負面情緒
+# 負面情緒
 all_sentiments %>% 
   filter(sentiment %in% c("negative_original", "negative_negated")) %>%
   ggplot()+
@@ -834,6 +819,7 @@ all_sentiments %>%
 
 
 ### 11gram - 尋找 "中山" 出現的前後五個詞彙
+- 目的在於得知併校議題上，討論中山時，也會討論到甚麼
 ```{r}
 # ngram function, where n=11
 ngram_11 <- function(t) {
@@ -900,7 +886,7 @@ tu_five_words_count %>%
 ```
 
 - 從長條圖可以看到中山前後常出現高大、高醫與中山，由於是中山可能併的學校，因此常一起出現。
-- 從此之外，其他詞彙，像是:資源、校區、西子灣以及仁武，就是偏向討論中山的校地資源，推測可能是討論到校地不足才併校。
+- 除此之外，其他詞彙，像是:資源、校區、西子灣以及仁武，就是偏向討論中山的校地資源，推測可能是討論到校地不足才併校。
 
 ### Word Correlation
 ```{r}
@@ -944,6 +930,7 @@ word_cors %>%
 - 左上角這群主要是跟中山學生的擔心有關，因為出現詞彙像是:分數、排名與畢業。中山學生擔心的在於不希望中山的排名下降，也不希望學生用比較高的分數進來中山，畢業後卻與高大領一樣的畢業證書
 
 ### 計算tf-idf找出各來源討論中較獨特的詞彙
+- 目的在於得知不同來源的討論面向差異的部分
 ```{r}
 #計算各來源的總詞彙數
 data_tokens_count <- data_tokens %>% 
@@ -1021,7 +1008,7 @@ article_comment_tokens <- article_comment_tokens %>%
   count(id,artTitle,artDate,source,word) %>% 
   rename(count=n)
 
-article_comment_tokens %>% View()
+article_comment_tokens 
 ```
 
 
@@ -1334,9 +1321,6 @@ merge_lda <- LDA(merge_dtm, k = 4, control = list(seed = 1))
 
 json_res <- topicmodels_json_ldavis(merge_lda,merge_dtm)
 
-# serVis(json_res,open.browser = T)
-
-# 如果無法開啟視窗(windows用戶)可執行這段
 serVis(json_res, out.dir = "vis", open.browser = T)
 writeLines(iconv(readLines("./vis/lda.json")),
        file("./vis/lda.json", encoding="UTF-8"))
