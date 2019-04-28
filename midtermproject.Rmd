@@ -1327,6 +1327,10 @@ writeLines(iconv(readLines("./vis/lda.json")),
 ```
 
 #![](img/LDAvis.png)
+#![](img/LDAvis_topic1.png)
+#![](img/LDAvis_topic2.png)
+#![](img/LDAvis_topic3.png)
+#![](img/LDAvis_topic4.png)
 
 - 從以上的LDAvis分析的圖可以看到topic1與topic2蠻接近的，主要是談論中山校方對兩校併校的看法與評估以及學生的畢業證書及學校分數，所以topic2出現中山校長鄭英耀以及副校長蔡秀芬還有評估、公聽會等等的字眼；topic3則是講到高醫的董事會與校友會的關係，因為兩方長期處於對立的關係，校友會不滿董事會長期做的事，如果併校了可能會影響到校董的勢力；topic4則是與併校對兩校的未來的影響有關係，所以出現學校的「指標、分數、選系」以及企業「最愛」用的大學生等等關於學校的表現。
 
