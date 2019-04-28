@@ -243,10 +243,22 @@ kable(data) %>%
 
 ### 以日期計算文章數
 ```{r}
+all_dates <- 
+  data.frame(seq(as.Date(min(data$artDate)), as.Date(max(data$artDate)),by="day"))
+names(all_dates) <- c("artDate")
+
+# 計算每日的文章數
 data_count_by_date <- data %>% 
   group_by(artDate,source) %>% 
   summarise(count = n()) %>% 
   arrange(desc(count))
+data_count_by_date_plot <- all_dates %>% 
+  merge(data_count_by_date,by.x=c('artDate'),by.y=c('artDate'),
+        all.x=T,all.y=T) %>% 
+  mutate(count = replace_na(count, 0)) %>% 
+  complete(artDate, source, fill = list(count = 0)) %>% 
+  filter(!is.na(source))
+
 
 kable(head(data_count_by_date, 20)) %>% 
   kable_styling(bootstrap_options = c("striped", "hover")) %>% 
@@ -257,7 +269,7 @@ kable(head(data_count_by_date, 20)) %>%
 ### 畫出日期以及文章分布折線圖 
 ```{r message=FALSE, warning=FALSE}
 plot_date <- 
-  data_count_by_date %>% 
+  data_count_by_date_plot %>% 
   ggplot(aes(x = as.Date(artDate), y = count,colour=source)) +
   geom_line(size = 0.5) + 
   # geom_vline(xintercept = as.numeric(as.Date("2019-03-30")), col='red') + 
@@ -632,7 +644,7 @@ bigrams_separated <- article_comment_bigram %>%
 #去除wrod1與word2都是stop word
 bigrams_separated  <- bigrams_separated %>%
   filter(!(word1 %in% stop_words & word2 %in% stop_words)) 
-
+# 依照不同來源使用不同詞典
 article_comment_sentiment_bigrams <- rbind(
   bigrams_separated %>% 
     filter(source == "nsysu_dcard") %>% 
@@ -702,33 +714,13 @@ source_sentiment_plot_data <- article_comment_sentiment_bigrams %>%
   summarise(count=n())  
 
 #計算各來源情緒
-source_sentiment_plot_data <- rbind(
-  all_dates %>% 
-  merge(source_sentiment_plot_data %>% 
-          filter(source == "nsysu_dcard")
+source_sentiment_plot_data <- all_dates %>% 
+  merge(source_sentiment_plot_data 
         ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
         all.x=T,all.y=T) %>% 
-  mutate(source = "nsysu_dcard"), 
-  all_dates %>% 
-  merge(source_sentiment_plot_data %>% 
-          filter(source == "nuk_dcard")
-        ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
-        all.x=T,all.y=T) %>% 
-  mutate(source = "nuk_dcard"), 
-  all_dates %>% 
-  merge(source_sentiment_plot_data %>% 
-          filter(source == "exam_dcard")
-        ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
-        all.x=T,all.y=T) %>% 
-  mutate(source = "exam_dcard"), 
-  all_dates %>% 
-  merge(source_sentiment_plot_data %>% 
-          filter(source == "ptt")
-        ,by.x=c('artDate', "sentiment"),by.y=c('artDate', "sentiment_tag"),
-        all.x=T,all.y=T) %>% 
-  mutate(source = "ptt") 
-  ) %>% 
-  mutate(count = replace_na(count, 0))
+  mutate(count = replace_na(count, 0)) %>% 
+  complete(artDate, source, sentiment, fill = list(count = 0)) %>% 
+  filter(!is.na(source))
 
 # 畫圖
 source_sentiment_plot_data %>%
@@ -1293,43 +1285,52 @@ merge_topic_ratio_all %>%
 
 ### LDAvis
 ```{r}
-topicmodels_json_ldavis <- function(fitted, doc_term){
-    require(LDAvis)
-    require(slam)
-
-    # Find required quantities
-    phi <- as.matrix(posterior(fitted)$terms)
-    theta <- as.matrix(posterior(fitted)$topics)
-    vocab <- colnames(phi)
-    term_freq <- slam::col_sums(doc_term)
-
-    # Convert to json
-    json_lda <- LDAvis::createJSON(phi = phi, theta = theta,
-                            vocab = vocab,
-                            doc.length = as.vector(table(doc_term$i)),
-                            term.frequency = term_freq)
-
-    return(json_lda)
-}
+# topicmodels_json_ldavis <- function(fitted, doc_term){
+#     require(LDAvis)
+#     require(slam)
+# 
+#     # Find required quantities
+#     phi <- as.matrix(posterior(fitted)$terms)
+#     theta <- as.matrix(posterior(fitted)$topics)
+#     vocab <- colnames(phi)
+#     term_freq <- slam::col_sums(doc_term)
+# 
+#     # Convert to json
+#     json_lda <- LDAvis::createJSON(phi = phi, theta = theta,
+#                             vocab = vocab,
+#                             doc.length = as.vector(table(doc_term$i)),
+#                             term.frequency = term_freq)
+# 
+#     return(json_lda)
+# }
 ```
 
 ```{r}
-merge_lda <- LDA(merge_dtm, k = 4, control = list(seed = 1))
-
-# 設置alpha及delta參數
-#devotion_lda_removed <- LDA(devotion_dtm_removed, k = 4, method = "Gibbs", control = list(seed = 1234, alpha = 2, delta= 0.1))
-
-json_res <- topicmodels_json_ldavis(merge_lda,merge_dtm)
-
-serVis(json_res, out.dir = "vis", open.browser = T)
-writeLines(iconv(readLines("./vis/lda.json")),
-       file("./vis/lda.json", encoding="UTF-8"))
+# merge_lda <- LDA(merge_dtm, k = 4, control = list(seed = 1))
+# 
+# # 設置alpha及delta參數
+# #devotion_lda_removed <- LDA(devotion_dtm_removed, k = 4, method = "Gibbs", control = list(seed = 1234, alpha = 2, delta= 0.1))
+# 
+# json_res <- topicmodels_json_ldavis(merge_lda,merge_dtm)
+# 
+# serVis(json_res, out.dir = "vis", open.browser = T)
+# writeLines(iconv(readLines("./vis/lda.json")),
+#        file("./vis/lda.json", encoding="UTF-8"))
 ```
 
+### LDAvis結果
 #![](img/LDAvis.png)
+
+### topic 1 詞彙
 #![](img/LDAvis_topic1.png)
+
+### topic 2 詞彙
 #![](img/LDAvis_topic2.png)
+
+### topic 3 詞彙
 #![](img/LDAvis_topic3.png)
+
+### topic 4 詞彙
 #![](img/LDAvis_topic4.png)
 
 - 從以上的LDAvis分析的圖可以看到topic1與topic2蠻接近的，主要是談論中山校方對兩校併校的看法與評估以及學生的畢業證書及學校分數，所以topic2出現中山校長鄭英耀以及副校長蔡秀芬還有評估、公聽會等等的字眼；topic3則是講到高醫的董事會與校友會的關係，因為兩方長期處於對立的關係，校友會不滿董事會長期做的事，如果併校了可能會影響到校董的勢力；topic4則是與併校對兩校的未來的影響有關係，所以出現學校的「指標、分數、選系」以及企業「最愛」用的大學生等等關於學校的表現。
